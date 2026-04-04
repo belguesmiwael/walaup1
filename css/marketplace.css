@@ -734,3 +734,97 @@ nav {
   .ip-footer { flex-direction: column; }
   .ip-btn-buy, .ip-btn-try { flex: none; }
 }
+
+/* ══════════════════════════════════════════
+   DEVICE FRAMES — iOS + Android
+   ════════════════════════════════════════ */
+
+/* ── iOS Frame ── */
+.dov-phone-ios {
+  background: #1a1a2e;
+  border: 2px solid rgba(255,255,255,.2);
+  border-radius: 50px;
+  padding: 16px 5px 10px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.8),
+    inset 0 0 0 1px rgba(255,255,255,.07),
+    0 30px 80px rgba(0,0,0,.8),
+    0 0 40px rgba(92,142,255,.06);
+}
+/* Dynamic Island */
+.dov-ios-island {
+  width: 90px; height: 28px;
+  background: #000;
+  border-radius: 20px;
+  margin: 0 auto 8px;
+  flex-shrink: 0;
+  position: relative;
+}
+.dov-ios-island::before {
+  content: '';
+  position: absolute;
+  right: 8px; top: 50%; transform: translateY(-50%);
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #1a1a2e;
+  border: 1.5px solid rgba(255,255,255,.08);
+}
+/* Home indicator */
+.dov-ios-home {
+  width: 40px; height: 4px; border-radius: 3px;
+  background: rgba(255,255,255,.25);
+  margin: 8px auto 0;
+  flex-shrink: 0;
+}
+
+/* ── Android Frame ── */
+.dov-phone-android {
+  background: #0d1117;
+  border: 2px solid rgba(255,255,255,.15);
+  border-radius: 36px;
+  padding: 14px 5px 8px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.8),
+    inset 0 0 0 1px rgba(255,255,255,.04),
+    0 30px 80px rgba(0,0,0,.8),
+    0 0 40px rgba(52,211,153,.04);
+}
+/* Hole punch camera */
+.dov-android-camera {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #000;
+  border: 1.5px solid rgba(255,255,255,.1);
+  margin: 0 auto 8px;
+  flex-shrink: 0;
+  position: relative;
+}
+.dov-android-camera::before {
+  content: '';
+  position: absolute; inset: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1a2a3a, #0d1117);
+}
+/* Android nav bar */
+.dov-android-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 24px; padding: 7px 0 4px;
+  flex-shrink: 0;
+}
+.dov-android-nav span {
+  font-size: .75rem; color: rgba(255,255,255,.3);
+  line-height: 1;
+}
+/* Android iframe — same transform approach */
+.dov-frame-android {
+  border: none; display: block;
+  width: 390px;
+  height: 100%;
+  transform-origin: top left;
+}
+
+/* ── Toggle — 3 buttons ── */
+@media (max-width: 520px) {
+  .dov-device-toggle { gap: 2px; }
+  .dtg-btn span { display: none; }
+  .dtg-btn { padding: 6px 8px; }
+}
