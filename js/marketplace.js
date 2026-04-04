@@ -359,6 +359,27 @@ function tryApp(id) {
   document.body.style.overflow = 'hidden';
 }
 
+
+/* ── Scale mobile iframe to fit phone frame ── */
+function scaleMobileIframe() {
+  var screen = document.querySelector('.dov-phone-screen');
+  var frame  = document.getElementById('ovFrame');
+  if (!screen || !frame) return;
+  var mobileWidth = 390; // render width (iPhone 14)
+  var availW = screen.clientWidth;
+  var availH = screen.clientHeight;
+  var scale  = availW / mobileWidth;
+  frame.style.width  = mobileWidth + 'px';
+  frame.style.height = Math.ceil(availH / scale) + 'px';
+  frame.style.transform = 'scale(' + scale + ')';
+}
+
+var _scaleRaf = null;
+function _scheduleScale() {
+  if (_scaleRaf) cancelAnimationFrame(_scaleRaf);
+  _scaleRaf = requestAnimationFrame(function() { scaleMobileIframe(); });
+}
+
 /* ── Device mode toggle ── */
 function setDeviceMode(mode, skipSound) {
   _curDeviceMode = mode;
@@ -373,9 +394,16 @@ function setDeviceMode(mode, skipSound) {
     if (webWrap)   webWrap.style.display   = 'none';
     if (btnM) btnM.classList.add('active');
     if (btnW) btnW.classList.remove('active');
-    // Load iframe
+    // Load iframe and scale
     var fr = document.getElementById('ovFrame');
-    if (fr && fr.src !== url) fr.src = url;
+    if (fr) {
+      if (fr.src !== url) {
+        fr.src = url;
+        fr.onload = function() { scaleMobileIframe(); fr.onload = null; };
+      }
+      // Scale immediately (even before load — sets dimensions)
+      setTimeout(scaleMobileIframe, 50);
+    }
     // Clear web iframe
     var frW = document.getElementById('ovFrameWeb');
     if (frW) frW.src = '';
@@ -481,6 +509,10 @@ function toast(msg, type) {
 }
 
 /* ── Keyboard + swipe ── */
+window.addEventListener('resize', function() {
+  if (_curDeviceMode === 'mobile') _scheduleScale();
+});
+
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { closeDemoOv(); closeConfirmModal(); closeInfoPanel(); }
 });
