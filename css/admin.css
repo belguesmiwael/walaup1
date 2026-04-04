@@ -74,11 +74,12 @@ a { text-decoration: none; color: inherit; }
   height: 100vh;
   background: var(--bg2);
   border-right: 1px solid var(--bd);
-  display: flex;
+  display: none;               /* cachée par défaut — visible après login */
   flex-direction: column;
   z-index: 200;
   transition: transform 0.28s cubic-bezier(.4,0,.2,1);
 }
+.admin-sidebar.visible { display: flex; }
 
 /* Mobile: hide sidebar by default */
 @media (max-width: 900px) {
@@ -1786,3 +1787,47 @@ tr:hover td { background: rgba(255,255,255,.02); }
   table { font-size: .72rem; }
   th, td { padding: 8px 10px; }
 }
+
+/* === FIX: Double brand — cacher topbar brand sur desktop === */
+@media (min-width: 901px) { .tb-brand { display: none; } }
+
+/* === FIX: Supprimer bulle flottante === */
+.chat-bubble-btn { display: none !important; }
+.chat-overlay { display: none !important; }
+
+/* === Typing indicator === */
+.typing-indicator {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 4px;
+  flex-shrink: 0;
+}
+.typing-indicator.visible { display: flex; }
+.typing-label {
+  font-size: .72rem;
+  color: var(--mu);
+  font-style: italic;
+}
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.typing-dots span {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--ac);
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+.typing-dots span:nth-child(2) { animation-delay: .2s; }
+.typing-dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: .4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* === Notif banner enrichie === */
+.notif-client { font-size: .78rem; font-weight: 700; color: var(--tx); display: block; }
+.notif-demand { font-size: .7rem; color: var(--ac); display: block; margin-top: 1px; }
+.notif-preview { font-size: .68rem; color: var(--tx2); display: block; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
