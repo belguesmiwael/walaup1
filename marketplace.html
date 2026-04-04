@@ -176,9 +176,13 @@
 
     <!-- Device toggle -->
     <div class="dov-device-toggle">
-      <button class="dtg-btn active" id="dtgMobile" onclick="setDeviceMode('mobile')">
+      <button class="dtg-btn active" id="dtgIos" onclick="setDeviceMode('ios')">
         <i class="ph-bold ph-device-mobile"></i>
-        <span>Mobile</span>
+        <span>iOS</span>
+      </button>
+      <button class="dtg-btn" id="dtgAndroid" onclick="setDeviceMode('android')">
+        <i class="ph-bold ph-device-mobile-camera"></i>
+        <span>Android</span>
       </button>
       <button class="dtg-btn" id="dtgWeb" onclick="setDeviceMode('web')">
         <i class="ph-bold ph-monitor"></i>
@@ -195,15 +199,29 @@
   <!-- IFRAME STAGE -->
   <div class="dov-stage" id="dovStage">
 
-    <!-- Mobile device frame -->
+    <!-- iOS device frame -->
     <div class="dov-phone-wrap" id="dovPhoneWrap">
-      <div class="dov-phone">
-        <div class="dov-phone-notch"></div>
+      <div class="dov-phone dov-phone-ios">
+        <div class="dov-ios-island"></div>
         <div class="dov-phone-screen">
           <iframe class="dov-frame" id="ovFrame" src=""
-            sandbox="allow-scripts allow-forms allow-popups"></iframe>
+            sandbox="allow-scripts allow-forms allow-popups allow-same-origin"></iframe>
         </div>
-        <div class="dov-phone-home"></div>
+        <div class="dov-ios-home"></div>
+      </div>
+    </div>
+
+    <!-- Android device frame -->
+    <div class="dov-phone-wrap" id="dovAndroidWrap" style="display:none">
+      <div class="dov-phone dov-phone-android">
+        <div class="dov-android-camera"></div>
+        <div class="dov-phone-screen">
+          <iframe class="dov-frame-android" id="ovFrameAndroid" src=""
+            sandbox="allow-scripts allow-forms allow-popups allow-same-origin"></iframe>
+        </div>
+        <div class="dov-android-nav">
+          <span>◀</span><span>●</span><span>■</span>
+        </div>
       </div>
     </div>
 
@@ -219,7 +237,7 @@
           <div class="dov-url-bar" id="dovUrlBar">walaup.app/demo</div>
         </div>
         <iframe class="dov-frame-web" id="ovFrameWeb" src=""
-          sandbox="allow-scripts allow-forms allow-popups"></iframe>
+          sandbox="allow-scripts allow-forms allow-popups allow-same-origin"></iframe>
       </div>
     </div>
 
