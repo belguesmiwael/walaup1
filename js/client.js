@@ -26,7 +26,42 @@ function showView(v) {
   });
   const el = $(v); if (!el) return;
   el.style.display = 'flex'; el.style.pointerEvents = 'auto';
-  if (v === 'dashView') el.style.flexDirection = 'column';
+  if (v === 'dashView') {
+    el.style.flexDirection = 'column';
+    // Mobile: show sidebar (project list) first
+    var sb = document.getElementById('clSidebar');
+    if (sb && window.innerWidth < 768) sb.classList.remove('hidden');
+    var main = document.getElementById('centerContent');
+    if (main) main.style.display = 'none';
+  }
+}
+
+/* ── Mobile tab navigation ── */
+function switchMobileTab(panelId, btnId) {
+  document.querySelectorAll('.cl-tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bn-btn').forEach(b => b.classList.remove('active'));
+  var panel = document.getElementById(panelId);
+  var btn   = document.getElementById(btnId);
+  if (panel) panel.classList.add('active');
+  if (btn)   btn.classList.add('active');
+  // Scroll chat to bottom when switching to messages
+  if (panelId === 'tabMessages') {
+    var msgs = document.getElementById('chatMsgs');
+    if (msgs) setTimeout(function(){ msgs.scrollTop = msgs.scrollHeight; }, 80);
+    // Clear badge
+    var badge = document.getElementById('bnMsgBadge');
+    if (badge) badge.style.display = 'none';
+  }
+}
+
+/* ── Mobile: go back to project list ── */
+function mobileGoBack() {
+  var sb = document.getElementById('clSidebar');
+  var cc = document.getElementById('centerContent');
+  if (sb) sb.classList.remove('hidden');
+  if (cc) cc.style.display = 'none';
+  // Reset to projet tab
+  switchMobileTab('tabProjet', 'bnProjet');
 }
 function showMsg(m, t='err') { const el=$('msgBox'); el.textContent=m; el.className='msg '+t; }
 function clearMsg() { $('msgBox').className = 'msg'; }
@@ -446,6 +481,23 @@ function selectProject(leadId) {
     + (lead.packLabel ? ' · ' + lead.packLabel : '');
 
   loadMessages(leadId);
+  // Setup typing
+  setupClientTyping(leadId);
+  // Mobile: hide sidebar, show content
+  if (window.innerWidth < 768) {
+    var sb = document.getElementById('clSidebar');
+    var cc = document.getElementById('centerContent');
+    if (sb) sb.classList.add('hidden');
+    if (cc) { cc.style.display = 'flex'; cc.style.flexDirection = 'column'; }
+    switchMobileTab('tabProjet', 'bnProjet');
+  } else {
+    var cc = document.getElementById('centerContent');
+    if (cc) { cc.style.display = 'flex'; cc.style.flexDirection = 'column'; }
+  }
+  var hdSubD = document.getElementById('chatHdSubD');
+  if (hdSubD) hdSubD.textContent = (_curLead && (_curLead.type||'App'))||'App';
+  var ciwD = document.getElementById('chatInputWrapD');
+  if (ciwD) ciwD.style.display = 'block';
 }
 
 function _updatePayBanners(lead) {
@@ -547,6 +599,12 @@ function loadMessages(leadId) {
       if (badge) {
         if (ur > 0) { badge.textContent = ur>9?'9+':ur; badge.className='chat-unread on'; }
         else badge.className = 'chat-unread';
+      // Also update desktop badge
+      var badgeD = document.getElementById('chatUnreadD');
+      if (badgeD) { badgeD.textContent = ur>9?'9+':ur; badgeD.className = ur>0?'chat-unread on':'chat-unread'; }
+      // Bottom nav badge (mobile)
+      var bnBadge = document.getElementById('bnMsgBadge');
+      if (bnBadge) { bnBadge.textContent = ur>9?'9+':ur; bnBadge.style.display = ur>0?'flex':'none'; }
       }
     }, e => console.error(e));
 }
@@ -620,6 +678,9 @@ function renderChat(msgs, leadId) {
     el.innerHTML += html;
   });
   if (atBottom) el.scrollTop = el.scrollHeight;
+  // Sync desktop chat
+  var elD = document.getElementById('chatMsgsD');
+  if (elD) { elD.innerHTML = el.innerHTML; elD.scrollTop = elD.scrollHeight; }
 }
 
 function renderDemos(msgs, leadId) {
@@ -716,9 +777,16 @@ async function approveFinal(msgId, leadId) {
 /* ── Send message ── */
 async function sendMsg() {
   const u = auth.currentUser; if (!u || !_curLeadId) return;
-  const text = $('chatInput').value.trim(); if (!text) return;
+  // Get text from whichever input is active
+  var ci = $('chatInput'), ciD = $('chatInputD');
+  var text = (ci && ci.value.trim()) || (ciD && ciD.value.trim()) || '';
+  if (!text) return;
   if(window.WalaupSound) WalaupSound.send();
-  $('chatInput').value = ''; $('chatInput').style.height = 'auto';
+  if (ci) { ci.value = ''; ci.style.height = 'auto'; }
+  if (ciD){ ciD.value = ''; ciD.style.height = 'auto'; }
+  // Clear typing
+  clearTimeout(window._clientTypingTimer);
+  db.collection('leads').doc(_curLeadId).update({clientTyping:false}).catch(function(){});
   try {
     await db.collection('messages').add({
       leadId:_curLeadId, userId:u.uid, from:'client', type:'text',
@@ -918,6 +986,59 @@ function listenClientNotifs(uid) {
     });
 }
 
+
+
+/* ══ TYPING — CLIENT SIDE ══ */
+function onClientTyping() {
+  if (!_curLeadId) return;
+  db.collection('leads').doc(_curLeadId).update({clientTyping:true}).catch(function(){});
+  clearTimeout(window._clientTypingTimer);
+  window._clientTypingTimer = setTimeout(function(){
+    if (_curLeadId) db.collection('leads').doc(_curLeadId).update({clientTyping:false}).catch(function(){});
+  }, 2000);
+}
+
+function setupClientTyping(leadId) {
+  if (!leadId) return;
+  // Unsubscribe previous
+  if (window._unsubClientTyping) window._unsubClientTyping();
+  // Listen adminTyping on lead doc → show indicator
+  window._unsubClientTyping = db.collection('leads').doc(leadId).onSnapshot(function(snap){
+    var data = snap.data() || {};
+    // Show in mobile chat
+    var ind  = document.getElementById('clientTypingIndicator');
+    var indD = document.getElementById('clientTypingIndicatorD');
+    if (ind)  ind.classList.toggle('visible',  !!data.adminTyping);
+    if (indD) indD.classList.toggle('visible', !!data.adminTyping);
+    // Scroll to show indicator
+    if (data.adminTyping) {
+      var msgs  = document.getElementById('chatMsgs');
+      var msgsD = document.getElementById('chatMsgsD');
+      if (msgs)  msgs.scrollTop  = msgs.scrollHeight;
+      if (msgsD) msgsD.scrollTop = msgsD.scrollHeight;
+    }
+  });
+}
+
+/* ══ iOS PWA INSTALL HINT ══ */
+(function(){
+  var isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  var isStandalone = window.navigator.standalone;
+  var dismissed = localStorage.getItem('ios_hint_dismissed');
+  if (isIos && !isStandalone && !dismissed) {
+    setTimeout(function(){
+      var hint = document.getElementById('iosInstallHint');
+      if (hint) {
+        hint.style.display = 'block';
+        var closeBtn = hint.querySelector('button');
+        if (closeBtn) closeBtn.addEventListener('click', function(){
+          localStorage.setItem('ios_hint_dismissed','1');
+        });
+      }
+    }, 4000);
+  }
+})();
+
 /* ════════════════════════════════════════════════════════
    PWA — SERVICE WORKER + INSTALL + NOTIFICATIONS
 ════════════════════════════════════════════════════════ */
@@ -935,12 +1056,15 @@ function listenClientNotifs(uid) {
   var _installEvt = null;
   window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault(); _installEvt = e;
-    setTimeout(function() {
-      if (!localStorage.getItem('pwa_dismissed')) {
-        var banner = document.getElementById('pwaInstallBanner');
-        if (banner) banner.classList.add('show');
-      }
-    }, 3000);
+    // Show immediately on auth page (no delay), after 3s on dashboard
+    var banner = document.getElementById('pwaInstallBanner');
+    if (banner && !localStorage.getItem('pwa_dismissed')) {
+      var authView = document.getElementById('authView');
+      var onAuth = authView && authView.style.display !== 'none';
+      setTimeout(function(){
+        if (!localStorage.getItem('pwa_dismissed')) banner.classList.add('show');
+      }, onAuth ? 1500 : 3000);
+    }
   });
 
   window.installPWA = function() {
