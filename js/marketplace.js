@@ -1,13 +1,14 @@
 /* ════════════════════════════════════════════════════════
-   HIVEAPP — marketplace.js
-   Logique complète de la page Marketplace
-   Dépend de : firebase-config.js (db), auth.js
+   WALAUP — marketplace.js v2
+   Image cards + Full-screen demo overlay
+   Mobile/Web toggle + 3 action CTAs
 ════════════════════════════════════════════════════════ */
 
-/* ── STATE ─────────────────────────────────────────────── */
-var _allApps = [], _curFilter = 'all', _curAppData = null, _trialValidated = false;
+/* ── STATE ── */
+var _allApps = [], _curFilter = 'all', _curAppData = null;
+var _trialValidated = false, _curDeviceMode = 'mobile';
 
-/* ── STATIC FALLBACK APPS ──────────────────────────────── */
+/* ── STATIC FALLBACK APPS ── */
 var STATIC_APPS = [
   { id:'s1', icon:'☕', name:'App Café & Restaurant',
     description:'Gestion complète : commandes par table, caisse, employés, stock produits, rapports journaliers.',
@@ -35,141 +36,251 @@ var STATIC_APPS = [
     demoUrl:'dettes.html', category:'services', partner:'à venir', active:true },
 ];
 
-/* ── FIRESTORE LOAD ─────────────────────────────────────── */
+/* ── FIRESTORE LOAD ── */
 var _firestoreLoaded = false;
 
 db.collection('marketplace_apps').onSnapshot(
-  function (snap) {
+  function(snap) {
     _firestoreLoaded = true;
-    var all = snap.docs.map(function (d) {
+    var all = snap.docs.map(function(d) {
       var data = d.data();
       return Object.assign({ id: d.id }, data, { src: data.demoUrl || data.src || '' });
     });
-    // Include apps where active is true OR undefined — exclude only explicitly false
-    _allApps = all.filter(function (a) { return a.active !== false; });
-    _allApps.sort(function (a, b) {
+    _allApps = all.filter(function(a) { return a.active !== false; });
+    _allApps.sort(function(a, b) {
       var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
       var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
       return tb - ta;
     });
-    if (!_allApps.length) { _allApps = STATIC_APPS; }
+    if (!_allApps.length) _allApps = STATIC_APPS;
     renderGrid();
   },
-  function (e) {
-    console.warn('Firestore error:', e.code, e.message);
-    var grid = document.getElementById('marketGrid');
-    if (e.code === 'permission-denied' && grid) {
-      grid.innerHTML =
-        '<div class="market-empty" style="color:var(--red)">' +
+  function(e) {
+    console.warn('Firestore error:', e.code);
+    if (e.code === 'permission-denied') {
+      var grid = document.getElementById('marketGrid');
+      if (grid) grid.innerHTML =
+        '<div class="market-empty" style="color:#f87171">' +
         '<div style="font-size:2rem;margin-bottom:8px">🔒</div>' +
-        '<div style="font-weight:700;margin-bottom:6px">Permissions Firestore insuffisantes</div>' +
-        '<div style="font-size:.75rem;color:var(--mu)">Allez dans Firebase Console → Firestore → Rules<br>et autorisez la collection marketplace_apps</div>' +
-        '</div>';
+        'Permissions Firestore insuffisantes</div>';
     }
     _allApps = STATIC_APPS;
     renderGrid();
   }
 );
 
-// Fallback: show static apps after 3.5s if Firestore hasn't responded
-setTimeout(function () {
-  if (!_firestoreLoaded) {
-    console.log('Marketplace: Firestore timeout — using static apps');
-    _allApps = STATIC_APPS;
-    renderGrid();
-  }
+// Fallback
+setTimeout(function() {
+  if (!_firestoreLoaded) { _allApps = STATIC_APPS; renderGrid(); }
 }, 3500);
 
-/* ── FILTER ─────────────────────────────────────────────── */
+/* ── FILTER ── */
 function filterApps(cat, btn) {
-  if(window.WalaupSound) WalaupSound.tab();
+  if (window.WalaupSound) WalaupSound.tab();
   _curFilter = cat;
-  document.querySelectorAll('.filter-btn').forEach(function (b) { b.classList.remove('on'); });
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('on'); });
   btn.classList.add('on');
   renderGrid();
 }
 
-/* ── RENDER GRID ────────────────────────────────────────── */
+/* ══════════════════════════════════════════
+   RENDER GRID — Cards with images
+   ════════════════════════════════════════ */
 function renderGrid() {
   var grid = document.getElementById('marketGrid');
   if (!grid) return;
-  var filtered = _allApps.filter(function (a) {
+  var filtered = _allApps.filter(function(a) {
     return _curFilter === 'all' || a.category === _curFilter || a.cat === _curFilter;
   });
   if (!filtered.length) {
-    grid.innerHTML = _curFilter !== 'all'
-      ? '<div class="market-empty"><div style="font-size:2.5rem;margin-bottom:10px">🔍</div>Aucune application dans cette catégorie.</div>'
-      : '<div class="market-empty"><div style="font-size:2.5rem;margin-bottom:10px">📭</div>Aucune application disponible pour le moment.</div>';
+    grid.innerHTML = '<div class="market-empty"><div style="font-size:2.5rem;margin-bottom:10px">' +
+      (_curFilter !== 'all' ? '🔍</div>Aucune application dans cette catégorie.' : '📭</div>Aucune application disponible.') + '</div>';
     return;
   }
-  grid.innerHTML = filtered.map(function (a) {
+
+  grid.innerHTML = filtered.map(function(a) {
+    var hasImg = a.thumbnailUrl && a.thumbnailUrl.trim();
+    var thumbHtml = hasImg
+      // Real image
+      ? '<div class="ac-thumb-wrap">' +
+          '<img class="ac-thumb" src="' + _esc(a.thumbnailUrl) + '" ' +
+            'onerror="this.parentNode.innerHTML=\'<div class=\\"ac-thumb-fallback\\">' + (a.icon||'📱') + '</div>\'"' +
+            ' alt="' + _esc(a.name||'') + '" loading="lazy">' +
+          '<div class="ac-thumb-gradient"></div>' +
+          (a.partner && a.partner !== 'à venir' ? '<div class="partner-badge">✓ Partenaire</div>' : '') +
+        '</div>'
+      // Emoji fallback
+      : '<div class="ac-thumb-wrap">' +
+          '<div class="ac-thumb-fallback">' + (a.icon||'📱') + '</div>' +
+          (a.partner && a.partner !== 'à venir' ? '<div class="partner-badge">✓ Partenaire</div>' : '') +
+        '</div>';
+
+    var tagsHtml = (a.tags||[]).map(function(t) {
+      return '<span class="ac-tag">' + _esc(t) + '</span>';
+    }).join('');
+
+    var origHtml = a.origPrice ? '<span class="ac-orig">' + _esc(a.origPrice) + '</span>' : '';
+
     return '<div class="app-card" onclick="tryApp(\'' + a.id + '\')">' +
-      (a.partner && a.partner !== 'à venir' ? '<div class="partner-badge">✓ Partenaire</div>' : '') +
-      '<div style="display:flex;align-items:flex-start;gap:11px">' +
-        '<div class="ac-icon">' + (a.icon || '📱') + '</div>' +
-        '<div style="flex:1;min-width:0">' +
-          '<div class="ac-name">' + (a.name || 'Application') + '</div>' +
-          (a.partner && a.partner !== 'à venir' ? '<div class="ac-partner">Par ' + a.partner + '</div>' : '') +
+      thumbHtml +
+      '<div class="ac-body">' +
+        '<div class="ac-header">' +
+          '<div class="ac-icon-sm">' + (a.icon||'📱') + '</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div class="ac-name">' + _esc(a.name||'Application') + '</div>' +
+            (a.partner && a.partner !== 'à venir' ? '<div class="ac-partner">Par ' + _esc(a.partner) + '</div>' : '') +
+          '</div>' +
         '</div>' +
-      '</div>' +
-      '<div class="ac-desc">' + (a.description || '') + '</div>' +
-      '<div class="ac-tags">' + (a.tags || []).map(function (t) { return '<span class="ac-tag">' + t + '</span>'; }).join('') + '</div>' +
-      '<div class="ac-footer">' +
-        '<div class="ac-price">' + (a.origPrice ? '<span class="ac-orig">' + a.origPrice + '</span>' : '') + (a.price || 'Sur devis') + '</div>' +
-        '<div class="ac-btns">' +
-          '<button class="btn-try" onclick="event.stopPropagation();tryApp(\'' + a.id + '\')">' +
-            '<i class="ph-bold ph-eye"></i> Essayer</button>' +
-          '<button class="btn-buy" onclick="event.stopPropagation();openConfirmModal(_allApps.find(function(x){return x.id===\'' + a.id + '\';}))">' +
-            '<i class="ph-bold ph-shopping-cart-simple" style="color:#ffd600"></i> Acheter</button>' +
+        '<div class="ac-desc">' + _esc(a.description||'') + '</div>' +
+        (tagsHtml ? '<div class="ac-tags">' + tagsHtml + '</div>' : '') +
+        '<div class="ac-footer">' +
+          '<div class="ac-price">' + origHtml + _esc(a.price||'Sur devis') + '</div>' +
+          '<div class="ac-btns">' +
+            '<button class="btn-try" onclick="event.stopPropagation();tryApp(\'' + a.id + '\')">' +
+              '<i class="ph-bold ph-eye"></i> Essayer</button>' +
+            '<button class="btn-buy" onclick="event.stopPropagation();openConfirmModal(_allApps.find(function(x){return x.id===\'' + a.id + '\';}))">' +
+              '<i class="ph-bold ph-shopping-cart-simple"></i> Acheter</button>' +
+          '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
   }).join('');
 }
 
-/* ── TRY APP OVERLAY ────────────────────────────────────── */
+function _esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ══════════════════════════════════════════
+   DEMO OVERLAY — Open / Device toggle
+   ════════════════════════════════════════ */
 function tryApp(id) {
-  if(window.WalaupSound) WalaupSound.click();
-  var a = _allApps.find(function (x) { return x.id === id; });
+  if (window.WalaupSound) WalaupSound.click();
+  var a = _allApps.find(function(x) { return x.id === id; });
   if (!a) return;
-  _curAppData = a; _trialValidated = false;
-  document.getElementById('ovIcon').textContent = a.icon || '📱';
-  document.getElementById('ovTitle').textContent = a.name || 'Application';
-  document.getElementById('ovPrice').textContent = a.price || '';
-  document.getElementById('ovPartner').textContent = (a.partner && a.partner !== 'à venir') ? 'Par ' + a.partner : '';
-  document.getElementById('ovFrame').src = a.demoUrl || a.src || '';
-  var badge = document.getElementById('trialBadge'); if (badge) badge.style.display = 'none';
+  _curAppData = a;
+  _trialValidated = false;
+
+  // Populate top bar
+  var dovIcon = document.getElementById('dovIcon');
+  if (dovIcon) {
+    // Show thumbnail in icon if available, else emoji
+    if (a.thumbnailUrl && a.thumbnailUrl.trim()) {
+      dovIcon.innerHTML = '<img src="' + a.thumbnailUrl + '" alt="" onerror="this.parentNode.textContent=\'' + (a.icon||'📱') + '\'">';
+    } else {
+      dovIcon.textContent = a.icon || '📱';
+    }
+  }
+  var el;
+  el = document.getElementById('dovTitle');   if (el) el.textContent = a.name || 'Application';
+  el = document.getElementById('dovPartner'); if (el) el.textContent = (a.partner && a.partner !== 'à venir') ? 'Par ' + a.partner : '';
+  el = document.getElementById('dovPrice');   if (el) el.textContent = a.price || '';
+  el = document.getElementById('dovUrlBar');  if (el) el.textContent = (a.demoUrl || 'walaup.app/demo').replace(/^https?:\/\//, '');
+
+  // Reset trial badge + button
+  var badge = document.getElementById('trialBadge');
+  if (badge) badge.style.display = 'none';
   var btn = document.getElementById('btnTrialDone');
-  if (btn) { btn.innerHTML = '<i class="ph-bold ph-check-circle" style="color:var(--green)"></i> Valider l\'essai'; btn.style.opacity = '1'; btn.style.pointerEvents = ''; }
-  document.getElementById('demoOv').classList.add('open');
+  if (btn) {
+    btn.innerHTML = '<i class="ph-bold ph-check-circle"></i><span>Valider l\'essai</span>';
+    btn.classList.remove('done');
+  }
+
+  // Start in mobile mode
+  setDeviceMode('mobile', true);
+
+  // Open
+  var ov = document.getElementById('demoOv');
+  if (ov) ov.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
+/* ── Device mode toggle ── */
+function setDeviceMode(mode, skipSound) {
+  _curDeviceMode = mode;
+  var phoneWrap = document.getElementById('dovPhoneWrap');
+  var webWrap   = document.getElementById('dovWebWrap');
+  var btnM = document.getElementById('dtgMobile');
+  var btnW = document.getElementById('dtgWeb');
+  var url = _curAppData ? (_curAppData.demoUrl || _curAppData.src || '') : '';
+
+  if (mode === 'mobile') {
+    if (phoneWrap) phoneWrap.style.display = 'flex';
+    if (webWrap)   webWrap.style.display   = 'none';
+    if (btnM) btnM.classList.add('active');
+    if (btnW) btnW.classList.remove('active');
+    // Load iframe
+    var fr = document.getElementById('ovFrame');
+    if (fr && fr.src !== url) fr.src = url;
+    // Clear web iframe
+    var frW = document.getElementById('ovFrameWeb');
+    if (frW) frW.src = '';
+  } else {
+    if (phoneWrap) phoneWrap.style.display = 'none';
+    if (webWrap)   webWrap.style.display   = 'flex';
+    if (btnM) btnM.classList.remove('active');
+    if (btnW) btnW.classList.add('active');
+    // Load web iframe
+    var frW = document.getElementById('ovFrameWeb');
+    if (frW && frW.src !== url) frW.src = url;
+    // Clear mobile iframe
+    var fr = document.getElementById('ovFrame');
+    if (fr) fr.src = '';
+  }
+  if (!skipSound && window.WalaupSound) WalaupSound.tab();
+}
+
+/* ── Close overlay ── */
 function closeDemoOv() {
-  if(window.WalaupSound) WalaupSound.click();
-  document.getElementById('demoOv').classList.remove('open');
-  document.getElementById('ovFrame').src = '';
+  if (window.WalaupSound) WalaupSound.click();
+  var ov = document.getElementById('demoOv');
+  if (ov) ov.classList.remove('open');
+  // Clear both iframes
+  var fr  = document.getElementById('ovFrame');
+  var frW = document.getElementById('ovFrameWeb');
+  if (fr)  fr.src  = '';
+  if (frW) frW.src = '';
   document.body.style.overflow = '';
 }
 
+/* ── Validate trial ── */
 function validateTrial() {
-  if(window.WalaupSound) WalaupSound.success();
+  if (window.WalaupSound) WalaupSound.success();
   _trialValidated = true;
   var badge = document.getElementById('trialBadge');
-  if (badge) { badge.style.display = 'flex'; setTimeout(function () { badge.style.display = 'none'; }, 3500); }
+  if (badge) {
+    badge.style.display = 'flex';
+    setTimeout(function() { badge.style.display = 'none'; }, 3500);
+  }
   var btn = document.getElementById('btnTrialDone');
-  if (btn) { btn.textContent = '✅ Essai validé !'; btn.style.opacity = '.5'; btn.style.pointerEvents = 'none'; }
-  setTimeout(function () { openConfirmModal(_curAppData); }, 800);
+  if (btn) {
+    btn.innerHTML = '<i class="ph-bold ph-check-circle"></i><span>Essai validé ✓</span>';
+    btn.classList.add('done');
+  }
+  // After 1s suggest buying
+  setTimeout(function() { openConfirmModal(_curAppData); }, 900);
 }
 
-/* ── CONFIRM BUY MODAL ──────────────────────────────────── */
+/* ── Go to estimateur (custom app) ── */
+function goToEstimateur() {
+  if (window.WalaupSound) WalaupSound.tab();
+  closeDemoOv();
+  toast('Redirigé vers l\'estimateur…', 'suc');
+  setTimeout(function() { window.location.href = 'estimateur.html'; }, 700);
+}
+
+/* ══════════════════════════════════════════
+   CONFIRM MODAL
+   ════════════════════════════════════════ */
 function openConfirmModal(a) {
   if (!a) return;
   _curAppData = a;
   closeDemoOv();
-  document.getElementById('cfmIcon').textContent = a.icon || '📱';
-  document.getElementById('cfmName').textContent = a.name || 'Application';
-  document.getElementById('cfmPrice').textContent = a.price || 'Sur devis';
+  var el;
+  el = document.getElementById('cfmIcon');  if (el) el.textContent = a.icon || '📱';
+  el = document.getElementById('cfmName');  if (el) el.textContent = a.name || 'Application';
+  el = document.getElementById('cfmPrice'); if (el) el.textContent = a.price || 'Sur devis';
   var modal = document.getElementById('confirmModal');
   if (modal) { modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
 }
@@ -180,9 +291,9 @@ function closeConfirmModal() {
   document.body.style.overflow = '';
 }
 
-/* ── PROCEED TO BUY → client.html ───────────────────────── */
+/* ── Proceed to buy → client.html ── */
 function proceedToBuy() {
-  if(window.WalaupSound) WalaupSound.success();
+  if (window.WalaupSound) WalaupSound.success();
   var a = _curAppData; if (!a) return;
   sessionStorage.setItem('bz_pack', 'essentiel');
   sessionStorage.setItem('bz_marketplace_app', JSON.stringify({
@@ -196,27 +307,27 @@ function proceedToBuy() {
   sessionStorage.setItem('bz_complexity', 'simple');
   closeConfirmModal();
   toast('✅ Redirection vers votre espace…', 'suc');
-  setTimeout(function () { window.location.href = 'client.html'; }, 1200);
+  setTimeout(function() { window.location.href = 'client.html'; }, 1200);
 }
 
-/* ── TOAST HELPER ───────────────────────────────────────── */
+/* ── Toast ── */
 function toast(msg, type) {
   var t = document.getElementById('toast'); if (!t) return;
-  t.textContent = msg; t.className = 'toast ' + (type || 'suc') + ' on';
-  setTimeout(function () { t.className = 'toast'; }, 2800);
+  t.textContent = msg; t.className = 'toast ' + (type||'suc') + ' on';
+  setTimeout(function() { t.className = 'toast'; }, 2800);
 }
 
-/* ── KEYBOARD & TOUCH ───────────────────────────────────── */
-document.addEventListener('keydown', function (e) {
+/* ── Keyboard + swipe ── */
+document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { closeDemoOv(); closeConfirmModal(); }
 });
 
 var _touchY0 = 0;
-document.addEventListener('touchstart', function (e) { _touchY0 = e.touches[0].clientY; }, { passive: true });
-document.addEventListener('touchend', function (e) {
+document.addEventListener('touchstart', function(e) { _touchY0 = e.touches[0].clientY; }, { passive:true });
+document.addEventListener('touchend', function(e) {
   var dy = e.changedTouches[0].clientY - _touchY0;
-  if (dy > 80) {
+  if (dy > 90) {
     if (document.getElementById('demoOv').classList.contains('open')) closeDemoOv();
     if (document.getElementById('confirmModal').classList.contains('open')) closeConfirmModal();
   }
-}, { passive: true });
+}, { passive:true });
