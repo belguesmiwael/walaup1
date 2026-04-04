@@ -1,0 +1,49 @@
+{
+  "name": "HiveApp Client",
+  "short_name": "HiveApp",
+  "description": "Votre espace client HiveApp — suivez vos projets d'apps sur mesure",
+  "start_url": "/client.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#ffd600",
+  "background_color": "#010108",
+  "lang": "fr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "/icons/icon-72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-128.png",  "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-144.png",  "sizes": "144x144", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-192.png",  "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-384.png",  "sizes": "384x384", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png",  "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/client-dash.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Dashboard client HiveApp"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mes projets",
+      "short_name": "Projets",
+      "description": "Voir l'état de vos projets",
+      "url": "/client.html#projets",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Estimateur",
+      "short_name": "Estimer",
+      "description": "Estimer le prix de votre app",
+      "url": "/estimateur.html",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "edge_side_panel": { "preferred_width": 480 }
+}

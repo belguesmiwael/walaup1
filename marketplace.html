@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Walaup — Marketplace</title>
+<!-- Remplacer l'ancienne ligne favicon par : -->
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- ① CSS partagé — variables, reset, brand, animations, shimmer -->
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/effects.css">
+<!-- ② CSS spécifique à cette page -->
+<link rel="stylesheet" href="css/marketplace.css">
+
+<!-- Phosphor Icons -->
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+</head>
+<body>
+
+<!-- Arrière-plan décoratif -->
+<div class="glow-line"></div>
+<div class="dot-grid"></div>
+<div class="mesh">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- ── NAV ────────────────────────────────────────────────── -->
+<nav>
+  <a href="index.html" class="brand-wordmark" aria-label="Walaup">Walaup</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Accueil</a>
+    <a href="estimateur.html" class="nav-link">Estimateur</a>
+    <a href="client.html" class="btn-client nav-link">Mon espace →</a>
+  </div>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-label">🏪 Applications partenaires — prêtes à déployer</div>
+  <h1>Des apps déjà créées,<br><span class="grad">prêtes à adapter</span></h1>
+  <p>Achetez une app partenaire et nous l'adaptons à votre business en 48h — à prix réduit.</p>
+</div>
+
+<!-- ── FILTERS ────────────────────────────────────────────── -->
+<div class="filters">
+  <button class="filter-btn on" onclick="filterApps('all',this)">Toutes</button>
+  <button class="filter-btn" onclick="filterApps('cafe',this)">☕ Café / Restaurant</button>
+  <button class="filter-btn" onclick="filterApps('commerce',this)">🏪 Commerce</button>
+  <button class="filter-btn" onclick="filterApps('services',this)">⚙️ Services</button>
+  <button class="filter-btn" onclick="filterApps('gestion',this)">📊 Gestion</button>
+  <button class="filter-btn" onclick="filterApps('autre',this)">📦 Autre</button>
+</div>
+
+<!-- ── GRID ───────────────────────────────────────────────── -->
+<div class="market-grid" id="marketGrid">
+  <!-- Skeleton loading -->
+  <div class="app-card loading">
+    <div class="ac-icon skeleton" style="width:50px;height:50px"></div>
+    <div class="skeleton" style="height:18px;width:60%;border-radius:5px"></div>
+    <div class="skeleton" style="height:12px;width:90%;border-radius:5px"></div>
+    <div class="skeleton" style="height:12px;width:70%;border-radius:5px"></div>
+  </div>
+  <div class="app-card loading">
+    <div class="ac-icon skeleton" style="width:50px;height:50px"></div>
+    <div class="skeleton" style="height:18px;width:55%;border-radius:5px"></div>
+    <div class="skeleton" style="height:12px;width:85%;border-radius:5px"></div>
+  </div>
+  <div class="app-card loading">
+    <div class="ac-icon skeleton" style="width:50px;height:50px"></div>
+    <div class="skeleton" style="height:18px;width:65%;border-radius:5px"></div>
+    <div class="skeleton" style="height:12px;width:80%;border-radius:5px"></div>
+  </div>
+</div>
+
+<!-- ── DEMO OVERLAY ───────────────────────────────────────── -->
+<div id="demoOv">
+  <div class="ov-panel">
+    <div class="ov-bar">
+      <div class="ov-app-info">
+        <div class="ov-app-icon" id="ovIcon">📱</div>
+        <div>
+          <div class="ov-app-name" id="ovTitle">Application</div>
+          <div style="font-size:.66rem;color:var(--mu)" id="ovPartner"></div>
+        </div>
+      </div>
+      <div class="ov-actions">
+        <span class="ov-app-price" id="ovPrice"></span>
+        <button class="btn-ov-try-done" id="btnTrialDone" onclick="validateTrial()">
+          <i class="ph-bold ph-check-circle" style="color:var(--green)"></i> Valider l'essai
+        </button>
+        <button class="btn-ov-buy" onclick="openConfirmModal(_curAppData)">
+          <i class="ph-bold ph-shopping-cart-simple" style="color:#ffd600"></i> Acheter
+        </button>
+        <button class="btn-ov-close" onclick="closeDemoOv()">✕</button>
+      </div>
+    </div>
+    <div class="ov-frame-wrap" id="ovFrameWrap">
+      <iframe id="ovFrame" src="" sandbox="allow-scripts allow-forms allow-popups"></iframe>
+      <div class="trial-validated" id="trialBadge" style="display:none">
+        ✅ Essai validé — vous pouvez maintenant acheter cette app !
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFIRM MODAL ──────────────────────────────────────── -->
+<div id="confirmModal">
+  <div class="confirm-card">
+    <button onclick="closeConfirmModal()" style="position:absolute;top:11px;right:11px;width:27px;height:27px;border-radius:7px;border:1px solid var(--bd);background:var(--sf);cursor:pointer;color:var(--mu);font-size:.84rem;display:flex;align-items:center;justify-content:center">✕</button>
+    <span class="confirm-icon" id="cfmIcon">📱</span>
+    <div class="confirm-app-name" id="cfmName"></div>
+    <div class="confirm-price" id="cfmPrice"></div>
+    <div class="confirm-desc">
+      Nous adapterons cette application à votre business en <strong>48h</strong>.
+      Vous serez contacté après votre inscription.
+    </div>
+    <div class="confirm-btns">
+      <button class="btn-confirm-buy" onclick="proceedToBuy()">
+        <i class="ph-bold ph-rocket-launch"></i> Obtenir cette app
+      </button>
+      <button class="btn-confirm-cancel" onclick="closeConfirmModal()">Continuer à tester</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCRIPTS — ordre obligatoire
+══════════════════════════════════════════════════════ -->
+
+<!-- ① Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+<!-- ② Config Firebase (expose window.db) -->
+<script src="js/firebase-config.js"></script>
+
+<!-- ③ Helpers partagés -->
+<script src="js/auth.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/effects.js"></script> 
+
+<!-- ④ Logique de la page -->
+<script src="js/marketplace.js"></script>
+
+</body>
+</html>

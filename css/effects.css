@@ -1,0 +1,799 @@
+/* ============================================================
+   Walaup — effects.css
+   Couche effets globaux (chargée après main.css, avant [page].css)
+   PWA Year 3000 layer : loader · scroll reveal · ripple · tilt ·
+   skeleton · cursor glow · noise · page transitions · counters ·
+   magnetic · particles canvas · z-index system · easing tokens
+   ============================================================ */
+
+/* ─── Z-INDEX SYSTEM ────────────────────────────────────────── */
+:root {
+  --z-below:   -1;
+  --z-base:     0;
+  --z-raised:  10;
+  --z-dropdown:20;
+  --z-sticky:  30;
+  --z-overlay: 40;
+  --z-modal:   50;
+  --z-toast:   60;
+  --z-tooltip: 70;
+  --z-loader: 100;
+
+  /* ─── EASING TOKENS ─────────────────────────────────────── */
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-expo:   cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth:    cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:  120ms;
+  --dur-base:  220ms;
+  --dur-slow:  380ms;
+  --dur-xslow: 650ms;
+
+  /* ─── SHADOW TOKENS ─────────────────────────────────────── */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.25), 0 1px 2px rgba(0,0,0,.35);
+  --shadow-md:  0 4px 8px rgba(0,0,0,.18), 0 10px 24px rgba(0,0,0,.22);
+  --shadow-lg:  0 12px 32px rgba(0,0,0,.28), 0 24px 64px rgba(0,0,0,.28);
+  --shadow-xl:  0 24px 64px rgba(0,0,0,.40), 0 48px 96px rgba(0,0,0,.32);
+  --shadow-glow-gold:  0 0 20px rgba(255,214,0,.28), 0 0 60px rgba(255,214,0,.12);
+  --shadow-glow-blue:  0 0 20px rgba(92,142,255,.30), 0 0 60px rgba(92,142,255,.14);
+  --shadow-glow-amber: 0 0 16px rgba(255,170,0,.28), 0 0 48px rgba(255,170,0,.10);
+
+  /* ─── GLASS TOKENS ──────────────────────────────────────── */
+  --glass-bg:     rgba(255,255,255,0.048);
+  --glass-bg-md:  rgba(255,255,255,0.072);
+  --glass-border: rgba(255,255,255,0.09);
+  --glass-blur:   blur(22px) saturate(180%);
+  --glass-blur-lg: blur(48px) saturate(200%);
+
+  /* ─── NOISE TEXTURE (SVG inline) ────────────────────────── */
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* ─── REDUCED MOTION ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  #hive-canvas { display: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   1. CINEMATIC LOADER
+   ══════════════════════════════════════════════════════════════ */
+#hive-loader {
+  position: fixed; inset: 0;
+  z-index: var(--z-loader);
+  background: #010108;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  transition: opacity var(--dur-slow) var(--ease-out-expo),
+              transform var(--dur-slow) var(--ease-out-expo);
+}
+#hive-loader.hive-loader--hidden {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+#hive-loader.hive-loader--gone { display: none; }
+
+.hive-loader__hex {
+  width: 64px;
+  height: 64px;
+  position: relative;
+}
+.hive-loader__hex svg {
+  width: 100%; height: 100%;
+  animation: hex-loader-spin 2.4s var(--ease-smooth) infinite;
+}
+@keyframes hex-loader-spin {
+  0%   { transform: rotate(0deg) scale(1);   opacity: 0.6; }
+  50%  { transform: rotate(180deg) scale(1.18); opacity: 1; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.6; }
+}
+
+.hive-loader__rings {
+  position: absolute; inset: -16px;
+}
+.hive-loader__rings::before,
+.hive-loader__rings::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  animation: loader-ring 2.4s linear infinite;
+}
+.hive-loader__rings::before {
+  border-top-color: rgba(255,214,0,.7);
+  border-right-color: rgba(255,214,0,.2);
+  animation-duration: 2.4s;
+}
+.hive-loader__rings::after {
+  border-bottom-color: rgba(108,143,255,.7);
+  border-left-color: rgba(108,143,255,.2);
+  animation-duration: 1.8s;
+  animation-direction: reverse;
+}
+@keyframes loader-ring {
+  to { transform: rotate(360deg); }
+}
+
+.hive-loader__wordmark {
+  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #f0efff;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: loader-fade-up var(--dur-slow) var(--ease-out-expo) 0.3s forwards;
+}
+.hive-loader__wordmark .grad {
+  display: inline-block !important;
+  background: linear-gradient(90deg,#ffd600 0%,#ff9500 25%,#c084fc 60%,#6c8fff 100%);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: brand-shimmer 3s ease-in-out infinite !important;
+  will-change: background-position !important;
+}
+
+.hive-loader__bar {
+  width: 140px;
+  height: 1.5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+  opacity: 0;
+  animation: loader-fade-up var(--dur-slow) var(--ease-out-expo) 0.5s forwards;
+}
+.hive-loader__bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd600, #6c8fff);
+  border-radius: 9999px;
+  animation: loader-fill 1.4s var(--ease-out-expo) 0.6s forwards;
+  transform-origin: left;
+  width: 0%;
+}
+@keyframes loader-fill { from { width: 0% } to { width: 100% } }
+@keyframes loader-fade-up {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   2. PARTICLES CANVAS (background ambiance)
+   ══════════════════════════════════════════════════════════════ */
+#hive-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-below);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3. NOISE TEXTURE OVERLAY
+   ══════════════════════════════════════════════════════════════ */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  z-index: var(--z-below);
+  background-image: var(--noise);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  opacity: 0.038;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. CURSOR GLOW
+   ══════════════════════════════════════════════════════════════ */
+.hive-cursor {
+  position: fixed;
+  width: 320px; height: 320px;
+  pointer-events: none;
+  z-index: var(--z-below);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,214,0,.05) 0%, rgba(108,143,255,.04) 35%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: transform 0.12s linear, opacity 0.3s;
+  will-change: transform;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5. SCROLL REVEAL — [data-animate]
+   ══════════════════════════════════════════════════════════════ */
+[data-animate] {
+  opacity: 0;
+  will-change: opacity, transform;
+  transition: opacity var(--dur-slow) var(--ease-out-expo),
+              transform var(--dur-slow) var(--ease-out-expo);
+}
+[data-animate="fade-up"]   { transform: translateY(28px); }
+[data-animate="fade-down"] { transform: translateY(-28px); }
+[data-animate="fade-left"] { transform: translateX(28px); }
+[data-animate="fade-right"]{ transform: translateX(-28px); }
+[data-animate="scale"]     { transform: scale(0.88); }
+[data-animate="scale-up"]  { transform: scale(0.88) translateY(20px); }
+[data-animate="flip"]      { transform: rotateX(-18deg) translateY(24px); perspective: 800px; }
+[data-animate].is-visible  {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger delays via data-delay */
+[data-delay="100"] { transition-delay: 100ms; }
+[data-delay="150"] { transition-delay: 150ms; }
+[data-delay="200"] { transition-delay: 200ms; }
+[data-delay="250"] { transition-delay: 250ms; }
+[data-delay="300"] { transition-delay: 300ms; }
+[data-delay="350"] { transition-delay: 350ms; }
+[data-delay="400"] { transition-delay: 400ms; }
+[data-delay="500"] { transition-delay: 500ms; }
+[data-delay="600"] { transition-delay: 600ms; }
+[data-delay="700"] { transition-delay: 700ms; }
+
+/* ══════════════════════════════════════════════════════════════
+   6. RIPPLE EFFECT (sur .btn, .card, .ripple-host)
+   ══════════════════════════════════════════════════════════════ */
+.ripple-host {
+  position: relative;
+  overflow: hidden;
+}
+.hive-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  transform: scale(0);
+  animation: ripple-expand 0.6s var(--ease-out-expo) forwards;
+  pointer-events: none;
+}
+@keyframes ripple-expand {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   7. 3D TILT CARDS (.card--tilt)
+   ══════════════════════════════════════════════════════════════ */
+.card--tilt {
+  transform-style: preserve-3d;
+  transition: transform var(--dur-base) var(--ease-out-expo);
+  will-change: transform;
+}
+.card--tilt:hover {
+  box-shadow: var(--shadow-xl), var(--shadow-glow-blue);
+}
+.card--tilt .tilt-shine {
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.10) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity var(--dur-base);
+  pointer-events: none;
+}
+.card--tilt:hover .tilt-shine { opacity: 1; }
+
+/* ══════════════════════════════════════════════════════════════
+   8. SKELETON LOADERS
+   ══════════════════════════════════════════════════════════════ */
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.04) 25%,
+    rgba(255,255,255,.09) 50%,
+    rgba(255,255,255,.04) 75%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  border-radius: 8px;
+}
+@keyframes skeleton-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.skeleton--text   { height: 14px; border-radius: 4px; }
+.skeleton--title  { height: 24px; border-radius: 6px; }
+.skeleton--avatar { width: 44px; height: 44px; border-radius: 50%; }
+.skeleton--card   { height: 120px; border-radius: 16px; }
+.skeleton--btn    { height: 40px; width: 120px; border-radius: 9999px; }
+
+/* Skeleton layout helpers */
+.skeleton-row  { display: flex; gap: 12px; align-items: center; }
+.skeleton-col  { display: flex; flex-direction: column; gap: 8px; flex:1; }
+.skeleton-wrap { display: flex; flex-direction: column; gap: 16px; padding: 8px 0; }
+
+/* ══════════════════════════════════════════════════════════════
+   9. PAGE TRANSITIONS
+   ══════════════════════════════════════════════════════════════ */
+.hive-view {
+  animation: view-enter var(--dur-slow) var(--ease-out-expo) both;
+}
+@keyframes view-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hive-view--exit {
+  animation: view-exit var(--dur-base) var(--ease-in-expo) both;
+}
+@keyframes view-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-10px); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10. ANIMATED COUNTERS (.hive-counter)
+   ══════════════════════════════════════════════════════════════ */
+.hive-counter {
+  font-variant-numeric: tabular-nums;
+  will-change: contents;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   11. MAGNETIC BUTTONS (.btn-magnetic)
+   ══════════════════════════════════════════════════════════════ */
+.btn-magnetic {
+  transition: transform var(--dur-base) var(--ease-spring),
+              box-shadow var(--dur-base) var(--ease-out-expo);
+  will-change: transform;
+}
+.btn-magnetic:hover {
+  box-shadow: var(--shadow-glow-gold);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   12. ENHANCED GLASSMORPHISM COMPONENTS
+   ══════════════════════════════════════════════════════════════ */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+}
+.glass-md {
+  background: var(--glass-bg-md);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.glass-strong {
+  background: rgba(255,255,255,.08);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid rgba(255,255,255,.16);
+}
+
+/* Inner glow border on hover */
+.glass-glow-hover {
+  transition: border-color var(--dur-base), box-shadow var(--dur-base);
+}
+.glass-glow-hover:hover {
+  border-color: rgba(255,214,0,.28);
+  box-shadow: inset 0 0 20px rgba(255,214,0,.04),
+              0 0 0 1px rgba(255,214,0,.12);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   13. GLOW CARD VARIANTS
+   ══════════════════════════════════════════════════════════════ */
+.card-glow {
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--dur-base) var(--ease-out-expo),
+              box-shadow var(--dur-base) var(--ease-out-expo);
+}
+.card-glow::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 35%, rgba(255,255,255,.04) 50%, transparent 65%);
+  transform: translateX(-200%);
+  transition: transform var(--dur-slow) var(--ease-out-expo);
+}
+.card-glow:hover::before { transform: translateX(200%); }
+.card-glow:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-blue);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   14. BUTTON ENHANCEMENTS (additive — over main.css)
+   ══════════════════════════════════════════════════════════════ */
+/* Active press feedback */
+button:active:not(:disabled),
+.btn:active:not(:disabled) {
+  transform: scale(0.97) !important;
+}
+
+/* Gold CTA glow enhancement */
+.btn-gold,
+[class*="btn"][class*="gold"],
+[class*="btn"][class*="primary"] {
+  box-shadow: 0 4px 18px rgba(255,214,0,.25);
+  transition: box-shadow var(--dur-base), transform var(--dur-base) var(--ease-spring);
+}
+[class*="btn"][class*="gold"]:hover,
+[class*="btn"][class*="primary"]:hover {
+  box-shadow: 0 8px 32px rgba(255,214,0,.38), 0 0 64px rgba(255,214,0,.08);
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   15. FOCUS & ACCESSIBILITY
+   ══════════════════════════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid rgba(255,214,0,.7);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   16. TOAST SYSTEM (unified — remplace les toasts inline des pages)
+   ══════════════════════════════════════════════════════════════ */
+#hive-toasts {
+  position: fixed;
+  bottom: 80px; left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  width: max-content;
+  max-width: min(400px, 92vw);
+}
+.hive-toast {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px;
+  background: rgba(14,14,32,0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #f0efff;
+  pointer-events: all;
+  white-space: nowrap;
+  animation: hive-toast-in var(--dur-slow) var(--ease-spring) forwards;
+}
+.hive-toast.removing {
+  animation: hive-toast-out var(--dur-base) var(--ease-in-expo) forwards;
+}
+.hive-toast--success { border-color: rgba(52,211,153,.25); }
+.hive-toast--error   { border-color: rgba(248,113,113,.25); }
+.hive-toast--warn    { border-color: rgba(251,191,36,.25); }
+.hive-toast__dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.hive-toast--success .hive-toast__dot { background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,.6); }
+.hive-toast--error   .hive-toast__dot { background: #f87171; box-shadow: 0 0 8px rgba(248,113,113,.6); }
+.hive-toast--warn    .hive-toast__dot { background: #fbbf24; box-shadow: 0 0 8px rgba(251,191,36,.6); }
+.hive-toast--info    .hive-toast__dot { background: #6c8fff; box-shadow: 0 0 8px rgba(108,143,255,.6); }
+
+@keyframes hive-toast-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes hive-toast-out {
+  from { opacity: 1; transform: translateY(0) scale(1); max-height: 60px; }
+  to   { opacity: 0; transform: translateY(8px) scale(0.95); max-height: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   17. EMPTY STATES
+   ══════════════════════════════════════════════════════════════ */
+.hive-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  color: rgba(200,198,240,.45);
+}
+.hive-empty__icon {
+  width: 64px; height: 64px;
+  opacity: 0.35;
+  animation: hive-pulse 3.5s ease-in-out infinite;
+}
+.hive-empty__title {
+  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: rgba(200,198,240,.55);
+}
+.hive-empty__sub {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  max-width: 260px;
+  color: rgba(200,198,240,.32);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   18. SCROLL PROGRESS BAR
+   ══════════════════════════════════════════════════════════════ */
+#hive-scroll-bar {
+  position: fixed; top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ffd600, #6c8fff);
+  z-index: var(--z-loader);
+  transition: width 0.1s linear;
+  pointer-events: none;
+  box-shadow: 0 0 8px rgba(255,214,0,.5);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   19. HOVER LIFT (utilitaire universel)
+   ══════════════════════════════════════════════════════════════ */
+.hover-lift {
+  transition: transform var(--dur-base) var(--ease-spring),
+              box-shadow var(--dur-base);
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   20. STATS CARD COUNT ANIMATION
+   ══════════════════════════════════════════════════════════════ */
+.stat-value {
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur-base);
+}
+.stat-card:hover .stat-value {
+  color: var(--hive-gold, #ffd600);
+  text-shadow: 0 0 20px rgba(255,214,0,.35);
+}
+
+/* Pulse on new data */
+@keyframes stat-pop {
+  0%  { transform: scale(1); }
+  40% { transform: scale(1.14); }
+  70% { transform: scale(0.96); }
+  100%{ transform: scale(1); }
+}
+.stat-value.popping { animation: stat-pop 0.5s var(--ease-spring); }
+
+
+/* ══════════════════════════════════════════════════════════════
+   21. MICRO-INTERACTIONS — INPUTS
+   Walaup — Session 9 additions
+   ══════════════════════════════════════════════════════════════ */
+
+/* Focus glow animé */
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  transition:
+    border-color var(--dur-base) var(--ease-smooth),
+    box-shadow   var(--dur-base) var(--ease-smooth),
+    background   var(--dur-base) var(--ease-smooth);
+}
+
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--hive-gold, #ffd600) !important;
+  background: rgba(255, 214, 0, 0.035) !important;
+  box-shadow:
+    0 0 0 3px rgba(255, 214, 0, 0.12),
+    0 0 24px rgba(255, 214, 0, 0.07),
+    inset 0 1px 0 rgba(255, 214, 0, 0.06) !important;
+}
+
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):hover:not(:focus),
+textarea:hover:not(:focus),
+select:hover:not(:focus) {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* Shake sur erreur */
+@keyframes input-shake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-7px); }
+  30%       { transform: translateX(6px); }
+  45%       { transform: translateX(-5px); }
+  60%       { transform: translateX(4px); }
+  75%       { transform: translateX(-2px); }
+}
+.input-error,
+input.error,
+textarea.error {
+  border-color: var(--red, #f87171) !important;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15) !important;
+  animation: input-shake 0.4s var(--ease-spring);
+}
+
+/* Glow success */
+input.success,
+textarea.success {
+  border-color: var(--green, #34d399) !important;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15) !important;
+}
+
+/* Placeholder stylé */
+input::placeholder,
+textarea::placeholder {
+  color: rgba(200, 198, 240, 0.28);
+  transition: color var(--dur-base);
+}
+input:focus::placeholder,
+textarea:focus::placeholder {
+  color: rgba(200, 198, 240, 0.18);
+}
+
+/* Label animé (pour les .input-wrap avec label flottant) */
+.input-wrap {
+  position: relative;
+}
+.input-wrap .floating-label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.88rem;
+  color: rgba(200, 198, 240, 0.45);
+  pointer-events: none;
+  transition:
+    top var(--dur-base) var(--ease-out-expo),
+    font-size var(--dur-base) var(--ease-out-expo),
+    color var(--dur-base);
+  background: transparent;
+  padding: 0 4px;
+}
+.input-wrap input:focus ~ .floating-label,
+.input-wrap input:not(:placeholder-shown) ~ .floating-label {
+  top: 0;
+  font-size: 0.70rem;
+  color: var(--hive-gold, #ffd600);
+  background: var(--bg, #010108);
+}
+
+/* Compteur de caractères */
+.char-count {
+  font-size: 0.70rem;
+  color: rgba(200, 198, 240, 0.35);
+  text-align: right;
+  margin-top: 4px;
+  transition: color var(--dur-base);
+}
+.char-count.warn  { color: var(--yellow, #fbbf24); }
+.char-count.limit { color: var(--red, #f87171); }
+
+
+/* ══════════════════════════════════════════════════════════════
+   22. NOISE TEXTURE — CARDS & SURFACES
+   ══════════════════════════════════════════════════════════════ */
+
+/* Grain subtil sur toutes les cards glass */
+.card::after,
+.glass::after,
+.glass-md::after,
+.glass-strong::after,
+.modal-box::after,
+.confirm-card::after,
+.stat-card::after,
+.pack::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--noise);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* S'assurer que le contenu passe au-dessus du noise */
+.card > *,
+.glass > *,
+.glass-md > *,
+.glass-strong > *,
+.modal-box > *,
+.confirm-card > *,
+.stat-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   23. GLASSMORPHISM MULTICOUCHE — MODALS & OVERLAYS
+   ══════════════════════════════════════════════════════════════ */
+
+/* Backdrop overlay */
+.modal-backdrop,
+#demoOv,
+#confirmModal,
+#chatOverlay,
+.overlay {
+  background: rgba(1, 1, 8, 0.72);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+/* Couche 1 — boîte principale */
+.modal-box,
+.confirm-card,
+.ov-panel {
+  position: relative;
+  overflow: hidden;
+  background: rgba(11, 11, 36, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 24px 80px rgba(0, 0, 0, 0.55),
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+/* Couche 2 — reflet interne (pseudo haut) */
+.modal-box::before,
+.confirm-card::before,
+.ov-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 214, 0, 0.25) 30%,
+    rgba(108, 143, 255, 0.25) 70%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Couche 3 — lueur interne subtile */
+.modal-box::after,
+.confirm-card::after {
+  background-image:
+    var(--noise),
+    radial-gradient(
+      ellipse 80% 50% at 50% 0%,
+      rgba(255, 214, 0, 0.04) 0%,
+      transparent 70%
+    );
+  opacity: 1;
+}
+
+/* Animation d'ouverture modal */
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(16px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+}
+.modal-box,
+.confirm-card {
+  animation: modal-enter var(--dur-slow) var(--ease-out-expo) both;
+}
+
+/* Backdrop fade */
+@keyframes backdrop-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.modal-backdrop,
+#confirmModal[style*="flex"],
+#confirmModal[style*="block"] {
+  animation: backdrop-fade var(--dur-base) var(--ease-smooth) both;
+}

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#03030d">
+<title>Walaup — Admin</title>
+<!-- Remplacer l'ancienne ligne favicon par : -->
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/effects.css"> 
+<link rel="stylesheet" href="css/admin.css">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<link rel="manifest" href="manifest-admin.json">
+</head>
+<body>
+
+<!-- ── MOBILE SIDEBAR OVERLAY ── -->
+<div class="sidebar-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- ── ADMIN SIDEBAR ── -->
+<div class="admin-sidebar" id="adminSidebar">
+  <div class="sb-header">
+    <div class="sb-logo">
+      <a href="admin.html" class="brand-wordmark" style="font-size:1.15rem">Walaup</a>
+    </div>
+    <button class="sb-close" onclick="closeSidebar()">✕</button>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-item active" id="sbi-dash" onclick="sbNav('dash')">
+      <div class="sb-icon"><i class="ph-bold ph-chart-bar"></i></div>
+      <span class="sb-label">Dashboard</span>
+    </div>
+    <div class="sb-item" id="sbi-clients" onclick="sbNav('clients')">
+      <div class="sb-icon"><i class="ph-bold ph-users"></i></div>
+      <span class="sb-label">Clients</span>
+      <span class="sb-badge" id="sbBadgeClients"></span>
+    </div>
+    <div class="sb-item" id="sbi-paiements" onclick="sbNav('paiements')">
+      <div class="sb-icon"><i class="ph-bold ph-credit-card"></i></div>
+      <span class="sb-label">Paiements</span>
+      <span class="sb-badge" id="sbBadgePay"></span>
+    </div>
+    <div class="sb-item" id="sbi-tarifs" onclick="sbNav('tarifs')">
+      <div class="sb-icon"><i class="ph-bold ph-coins"></i></div>
+      <span class="sb-label">Tarifs</span>
+    </div>
+    <div class="sb-item" id="sbi-stats" onclick="sbNav('stats')">
+      <div class="sb-icon"><i class="ph-bold ph-trend-up"></i></div>
+      <span class="sb-label">Statistiques</span>
+    </div>
+    <div class="sb-item" id="sbi-testi" onclick="sbNav('testi')">
+      <div class="sb-icon"><i class="ph-bold ph-star"></i></div>
+      <span class="sb-label">Avis clients</span>
+    </div>
+    <div class="sb-item" id="sbi-marketplace" onclick="sbNav('marketplace')">
+      <div class="sb-icon"><i class="ph-bold ph-storefront"></i></div>
+      <span class="sb-label">Marketplace</span>
+    </div>
+  </nav>
+  <div class="sb-footer">
+    <button class="sb-logout" onclick="logout()">🚪 Déconnexion</button>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginView">
+  <div class="lc">
+    <div class="lc-logo">
+      <img src="icons/logo-full.svg" alt="Walaup" width="130" style="display:block;margin:0 auto 8px">
+    </div>
+    <h2>Accès Admin</h2><p>Réservé à l'équipe Walaup</p>
+    <input type="password" id="passIn" placeholder="Mot de passe admin" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Accéder →</button>
+    <div class="lerr" id="lerr">❌ Mot de passe incorrect</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminView">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="ham-btn" id="hamBtn" onclick="toggleSidebar()" aria-label="Menu">
+        <span class="ham-line"></span>
+        <span class="ham-line"></span>
+        <span class="ham-line"></span>
+      </button>
+      <div class="tbl" style="display:flex;align-items:center;gap:6px">
+        <a href="admin.html" class="brand-wordmark" style="font-size:1.1rem">Walaup</a>
+        <span style="font-size:.65rem;color:var(--mu);font-weight:500;opacity:.7">Admin</span>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab on" onclick="showTab('dash',this)"><i class="ph-bold ph-chart-bar" style="font-size:1rem"></i> Dashboard</button>
+      <button class="nav-tab" onclick="showTab('clients',this)"><i class="ph-bold ph-users" style="font-size:1rem"></i> Clients</button>
+      <button class="nav-tab" onclick="showTab('tarifs',this)"><i class="ph-bold ph-coins" style="font-size:1rem"></i> Tarifs</button>
+      <button class="nav-tab" onclick="showTab('paiements',this)"><i class="ph-bold ph-credit-card" style="font-size:1rem"></i> Paiements</button>
+      <button class="nav-tab" onclick="showTab('stats',this)"><i class="ph-bold ph-trend-up" style="font-size:1rem"></i> Stats</button>
+      <button class="nav-tab" onclick="showTab('testi',this)"><i class="ph-bold ph-star" style="font-size:1rem"></i> Avis</button>
+      <button class="nav-tab" onclick="showTab('marketplace',this)"><i class="ph-bold ph-storefront" style="font-size:1rem"></i> Marketplace</button>
+    </div>
+    <div class="tbr">
+      <button class="lo-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="tab-content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="tab-pane" id="dashTab">
+      <div class="stats-row">
+        <div class="stat-card sc-blue"><div class="stat-num" id="stTotal">—</div><div class="stat-lbl">Total clients</div></div>
+        <div class="stat-card sc-green"><div class="stat-num" id="stNew" style="color:var(--ac)">—</div><div class="stat-lbl">Nouvelles</div></div>
+        <div class="stat-card sc-yellow"><div class="stat-num" id="stDemo" style="color:var(--yellow)">—</div><div class="stat-lbl">Démos</div></div>
+        <div class="stat-card sc-purple"><div class="stat-num" id="stVal" style="color:var(--ac2)">—</div><div class="stat-lbl">Validées</div></div>
+        <div class="stat-card sc-red"><div class="stat-num" id="stConv" style="color:var(--green)">—</div><div class="stat-lbl">Livrées</div></div>
+      </div>
+      <div class="dash-grid">
+        <div class="card"><div class="card-hd"><h3>📋 Activité récente</h3></div><div class="card-bd" id="actFeed" style="padding:0 14px"></div></div>
+        <div class="card dash-clients-card"><div class="card-hd"><h3>🏆 Clients récents</h3></div><div class="card-bd" id="topClients" style="padding:0 14px"></div></div>
+        <div class="card"><div class="card-hd"><h3>📦 Par type</h3></div><div class="card-bd"><div class="chart-bars" id="chartType"></div></div></div>
+        <div class="card"><div class="card-hd"><h3>💳 Par pack</h3></div><div class="card-bd"><div class="chart-bars" id="chartPack"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ── CLIENTS ── -->
+    <div class="tab-pane" id="clientsTab">
+      <div class="clients-layout">
+        <div class="cl-list">
+          <div class="cl-list-hd">
+            <h3>Clients <span id="clientCount" style="font-size:.7rem;color:var(--mu);font-weight:400"></span></h3>
+            <input class="search-in" id="searchIn" placeholder="🔍 Rechercher..." oninput="renderLeads()">
+          </div>
+          <div class="filter-row">
+            <button class="fb on" onclick="setFilter('all',this)">Tous</button>
+            <button class="fb" onclick="setFilter('new',this)">Nouvelles</button>
+            <button class="fb" onclick="setFilter('demo',this)">Démo</button>
+            <button class="fb" onclick="setFilter('validated',this)">Validées</button>
+            <button class="fb" onclick="setFilter('payment_confirmed',this)">💳</button>
+          </div>
+          <div class="clients-list" id="clientsList"></div>
+        </div>
+
+        <div class="client-detail">
+          <div class="cd-empty" id="cdEmpty"><div style="font-size:3rem">👆</div><div style="font-weight:700">Sélectionnez un client</div></div>
+          <div id="cdContent" style="display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0">
+
+            <div class="cd-header">
+              <div style="display:flex;align-items:flex-start;gap:8px">
+                <button class="cd-back-btn" id="cdBackBtn" onclick="closeClientDetail()">
+                  <i class="ph-bold ph-arrow-left"></i> Retour
+                </button>
+                <div>
+                  <div class="cdh-name" id="cdhName">—</div>
+                  <div class="cdh-meta" id="cdhMeta">—</div>
+                </div>
+              </div>
+              <div class="cdh-actions">
+                <select class="status-sel" id="statusSel" onchange="updateStatus(this.value)">
+                  <option value="new">🔵 Nouvelle</option>
+                  <option value="contacted">🟣 Contacté</option>
+                  <option value="demo">🟡 Démo</option>
+                  <option value="validated">🟢 Validée</option>
+                  <option value="payment_requested">💳 Paiement requis</option>
+                  <option value="payment_confirmed">💳 Paiement confirmé</option>
+                  <option value="converted">✅ Livrée</option>
+                  <option value="closed">⚫ Fermé</option>
+                </select>
+                <button class="btn-sm" onclick="copyClientInfo()"><i class="ph-bold ph-clipboard-text"></i> Copier</button>
+                <button class="btn-sm danger" onclick="deleteClient()"><i class="ph-bold ph-trash"></i> Supprimer</button>
+              </div>
+              <!-- Payment alert -->
+              <div id="payAlertBanner" style="display:none;width:100%;background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(251,191,36,.06));border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:11px 14px;margin-top:7px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-size:.78rem;font-weight:800;color:var(--yellow);margin-bottom:2px" id="payAlertTitle">💳 Démo validée</div>
+                  <div style="font-size:.7rem;color:var(--mu)" id="payAlertSub">Le client a validé la démo — envoyez la version finale.</div>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <button onclick="requestPayment()" style="padding:7px 13px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--yellow),var(--orange));color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:.74rem;cursor:pointer">💳 Confirmer paiement reçu</button>
+                  <button onclick="switchInputTab('demo',document.querySelector('.itab:nth-child(2)'))" style="padding:7px 13px;border-radius:8px;border:1px solid rgba(52,211,153,.3);background:rgba(52,211,153,.1);color:var(--green);font-family:'Syne',sans-serif;font-weight:800;font-size:.74rem;cursor:pointer">🏁 Envoyer version finale</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── BARRE DE DEMANDES (multi-app par client) ── -->
+            <div class="demands-bar" id="demandsBar" style="display:none">
+              <span class="demands-bar-label">📱 Demandes :</span>
+              <div id="demandBtns" style="display:flex;gap:5px;flex-wrap:nowrap"></div>
+            </div>
+
+            <!-- ── NAVIGATION SECTIONS FICHE CLIENT ── -->
+            <nav class="cd-nav">
+              <button class="cd-nav-btn on" onclick="showCdSection('fiche',this)">
+                <i class="ph-bold ph-user"></i><span>Fiche</span>
+              </button>
+              <button class="cd-nav-btn" id="cdNavMsg" onclick="showCdSection('messagerie',this)">
+                <i class="ph-bold ph-chat-circle-dots"></i><span>Messagerie</span>
+                <span class="cd-nav-badge" id="cdMsgBadge" style="display:none"></span>
+              </button>
+              <button class="cd-nav-btn" onclick="showCdSection('historique',this)">
+                <i class="ph-bold ph-clock-counter-clockwise"></i><span>Historique</span>
+              </button>
+              <button class="cd-nav-btn" onclick="showCdSection('prompt',this)">
+                <i class="ph-bold ph-robot"></i><span>Prompt</span>
+              </button>
+            </nav>
+
+            <!-- ── SECTION : FICHE ── -->
+            <div class="cd-section on" id="cdSectionFiche">
+              <div class="cd-section-scroll">
+                <div class="info-sec">
+                  <div class="is-hd">📋 Demande client</div>
+                  <div class="is-bd" id="clientInfo"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── SECTION : MESSAGERIE ── -->
+            <div class="cd-section" id="cdSectionMessagerie">
+              <div class="chat-msgs" id="adminChatMsgs"></div>
+              <div class="input-area">
+                <div class="input-tabs">
+                  <button class="itab on" onclick="switchInputTab('msg',this)">✉️ Message</button>
+                  <button class="itab" onclick="switchInputTab('demo',this)">🎯 Démo</button>
+                </div>
+                <div id="msgPanel">
+                  <div class="msg-row">
+                    <textarea class="msg-ta" id="adminMsgIn" placeholder="Écrivez un message..." rows="2"
+                      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAdminMsg()}"
+                      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+                    <button class="send-btn" onclick="sendAdminMsg()">↑</button>
+                  </div>
+                </div>
+                <div id="demoPanel" style="display:none">
+                  <div class="demo-form">
+                    <div class="df-row">
+                      <input type="url" id="demoUrlIn" placeholder="https://demo.html" style="flex:2">
+                      <input type="text" id="demoVerIn" placeholder="v1" style="flex:.5;min-width:45px">
+                    </div>
+                    <textarea id="demoMsgIn" placeholder="Message pour le client..." rows="2"></textarea>
+                    <div style="display:flex;align-items:center;gap:8px;margin:2px 0">
+                      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.74rem;color:var(--mu)">
+                        <input type="checkbox" id="isFinalChk" style="accent-color:var(--green);width:16px;height:16px;cursor:pointer">
+                        <span style="color:var(--green);font-weight:800;font-size:.8rem">🏁 Version finale</span>
+                        <span style="font-size:.63rem;color:var(--mu);margin-left:2px">(après paiement)</span>
+                      </label>
+                    </div>
+                    <div class="df-footer">
+                      <span class="df-hint">Version <span id="demoVerNum">1</span> / max 3</span>
+                      <button class="btn-sm primary" onclick="sendDemoMsg()">🎯 Envoyer</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── SECTION : HISTORIQUE ── -->
+            <div class="cd-section" id="cdSectionHistorique">
+              <div class="cd-section-scroll">
+                <div id="clientHistorique" class="historique-list">
+                  <div style="padding:30px;text-align:center;color:var(--mu);font-size:.84rem">Chargement de l'historique…</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── SECTION : PROMPT ── -->
+            <div class="cd-section" id="cdSectionPrompt">
+              <div class="cd-section-scroll">
+                <div class="prompt-panel" style="border-radius:0;border:none">
+                  <div class="pp-bd" id="ppBody">
+                    <div id="ppNoPrompt" style="font-size:.84rem;color:var(--mu);padding:20px;text-align:center">Aucun prompt — client non venu via estimateur.</div>
+                    <textarea class="pp-ta" id="ppText" style="display:none;min-height:200px"></textarea>
+                    <div class="pp-feats" id="ppFeats" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px"></div>
+                    <div class="pp-actions" style="padding:10px 12px">
+                      <button class="pp-copy" onclick="copyPrompt()"><i class="ph-bold ph-clipboard-text"></i> Copier</button>
+                      <button class="pp-open" onclick="openInClaude()">🤖 Ouvrir dans Claude</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TARIFS ── -->
+    <div class="tab-pane" id="tarifsTab">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-shrink:0">
+        <h2 style="font-size:1rem;font-weight:800">💰 Grille tarifaire</h2>
+        <button class="btn-save-tarifs" onclick="saveTarifs()">💾 Sauvegarder tout</button>
+      </div>
+      <!-- Packs -->
+      <div>
+        <h3 style="font-size:.82rem;font-weight:800;margin-bottom:11px;color:var(--mu)">PACKS</h3>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:13px">
+          <div class="pack-card pc-ess">
+            <h3>🟢 Essentiel</h3><div class="pc-sub">Application de base</div>
+            <div class="pack-price-row"><label>Prix fixe (DT)</label><input type="number" id="pEssFixed" value="600" min="0"></div>
+            <div class="pack-price-row"><label>Abonnement/mois</label><input type="number" id="pEssMois" value="0" min="0" placeholder="0 = non proposé"></div>
+            <div class="pack-toggle">
+              <label class="toggle-switch"><input type="checkbox" id="pEssActive" checked><div class="toggle-slider"></div></label>
+              <span class="toggle-label">Pack actif</span>
+            </div>
+            <div class="remise-section">
+              <div style="font-size:.7rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Remise</div>
+              <div class="remise-row">
+                <div class="remise-fg"><label>% remise</label><input type="number" id="rEss" placeholder="0" min="0" max="100"></div>
+                <div class="remise-fg"><label>Motif</label><input type="text" id="mEss" placeholder="Ex: Client fidèle"></div>
+                <button class="btn-remise" onclick="applyRemise('essentiel')">Appliquer</button>
+              </div>
+              <div class="active-remise" id="remEss" style="display:none">
+                <span id="remEssTxt"></span>
+                <button onclick="cancelRemise('essentiel')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.72rem;font-family:'Plus Jakarta Sans',sans-serif">✕ Annuler</button>
+              </div>
+            </div>
+          </div>
+          <div class="pack-card pc-pro">
+            <h3>🔵 Pro</h3><div class="pc-sub">Application complète ⭐</div>
+            <div class="pack-price-row"><label>Prix fixe (DT)</label><input type="number" id="pProFixed" value="1200" min="0"></div>
+            <div class="pack-price-row"><label>Abonnement/mois</label><input type="number" id="pProMois" value="0" min="0" placeholder="0 = non proposé"></div>
+            <div class="pack-toggle">
+              <label class="toggle-switch"><input type="checkbox" id="pProActive" checked><div class="toggle-slider"></div></label>
+              <span class="toggle-label">Pack actif</span>
+            </div>
+            <div class="remise-section">
+              <div style="font-size:.7rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Remise</div>
+              <div class="remise-row">
+                <div class="remise-fg"><label>% remise</label><input type="number" id="rPro" placeholder="0" min="0" max="100"></div>
+                <div class="remise-fg"><label>Motif</label><input type="text" id="mPro" placeholder="Ex: Promo lancement"></div>
+                <button class="btn-remise" onclick="applyRemise('pro')">Appliquer</button>
+              </div>
+              <div class="active-remise" id="remPro" style="display:none">
+                <span id="remProTxt"></span>
+                <button onclick="cancelRemise('pro')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.72rem;font-family:'Plus Jakarta Sans',sans-serif">✕ Annuler</button>
+              </div>
+            </div>
+          </div>
+          <div class="pack-card pc-par">
+            <h3>🔴 Partenaire</h3><div class="pc-sub">Application avancée</div>
+            <div class="pack-price-row"><label>Prix fixe (DT)</label><input type="number" id="pParFixed" value="2000" min="0"></div>
+            <div class="pack-price-row"><label>Abonnement/mois</label><input type="number" id="pParMois" value="0" min="0" placeholder="0 = non proposé"></div>
+            <div class="pack-toggle">
+              <label class="toggle-switch"><input type="checkbox" id="pParActive" checked><div class="toggle-slider"></div></label>
+              <span class="toggle-label">Pack actif</span>
+            </div>
+            <div class="remise-section">
+              <div style="font-size:.7rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Remise</div>
+              <div class="remise-row">
+                <div class="remise-fg"><label>% remise</label><input type="number" id="rPar" placeholder="0" min="0" max="100"></div>
+                <div class="remise-fg"><label>Motif</label><input type="text" id="mPar" placeholder="Ex: ONG / Partenariat"></div>
+                <button class="btn-remise" onclick="applyRemise('partenaire')">Appliquer</button>
+              </div>
+              <div class="active-remise" id="remPar" style="display:none">
+                <span id="remParTxt"></span>
+                <button onclick="cancelRemise('partenaire')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.72rem;font-family:'Plus Jakarta Sans',sans-serif">✕ Annuler</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Fonctionnalités -->
+      <div>
+        <h3 style="font-size:.82rem;font-weight:800;margin-bottom:11px;color:var(--mu)">FONCTIONNALITÉS (prix unitaire DT)</h3>
+        <div class="tarifs-grid" id="tarifsGrid"><!-- Rendered by JS --></div>
+      </div>
+    </div>
+
+    <!-- ── PAIEMENTS ── -->
+    <div class="tab-pane" id="paiementsTab">
+      <div class="pay-stats">
+        <div class="stat-card sc-green"><div class="stat-num" id="payTotal">0 DT</div><div class="stat-lbl">Total encaissé</div></div>
+        <div class="stat-card sc-yellow"><div class="stat-num" id="payPending">0</div><div class="stat-lbl">En attente</div></div>
+        <div class="stat-card sc-blue"><div class="stat-num" id="payConfirmed">0</div><div class="stat-lbl">Confirmés</div></div>
+        <div class="stat-card sc-purple"><div class="stat-num" id="payMonth">0 DT</div><div class="stat-lbl">Ce mois</div></div>
+      </div>
+      <div class="pay-table-wrap">
+        <div class="pay-table-hd">
+          <h3>💳 Historique des paiements</h3>
+          <div class="pay-filter-row">
+            <button class="pf-btn on" onclick="filterPay('all',this)">Tous</button>
+            <button class="pf-btn" onclick="filterPay('validated',this)">⏳ Démo validée</button>
+            <button class="pf-btn" onclick="filterPay('payment_requested',this)">💳 Requis</button>
+            <button class="pf-btn" onclick="filterPay('payment_confirmed',this)">✅ Confirmés</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr><th>Client</th><th>Pack</th><th>Montant</th><th>Méthode</th><th>Statut</th><th>Date</th><th>Action</th></tr>
+            </thead>
+            <tbody id="payTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STATS ── -->
+    <div class="tab-pane" id="statsTab">
+      <div class="stats-row">
+        <div class="stat-card sc-blue"><div class="stat-num" id="st2Total">—</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-card sc-green"><div class="stat-num" id="st2New" style="color:var(--ac)">—</div><div class="stat-lbl">Nouvelles</div></div>
+        <div class="stat-card sc-yellow"><div class="stat-num" id="st2Demo" style="color:var(--yellow)">—</div><div class="stat-lbl">Démos</div></div>
+        <div class="stat-card sc-purple"><div class="stat-num" id="st2Val" style="color:var(--ac2)">—</div><div class="stat-lbl">Validées</div></div>
+        <div class="stat-card sc-red"><div class="stat-num" id="st2Conv" style="color:var(--green)">—</div><div class="stat-lbl">Livrées</div></div>
+      </div>
+      <div class="dash-grid">
+        <div class="card"><div class="card-hd"><h3>📦 Par type</h3></div><div class="card-bd"><div class="chart-bars" id="st2Type"></div></div></div>
+        <div class="card"><div class="card-hd"><h3>💳 Par pack</h3></div><div class="card-bd"><div class="chart-bars" id="st2Pack"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ── TESTIMONIALS ── -->
+    <div class="tab-pane" id="testiTab">
+      <div class="testi-form">
+        <h3>➕ Ajouter un témoignage</h3>
+        <div class="tf-grid">
+          <div class="fg"><label>Nom</label><input id="tn" placeholder="Karim B."></div>
+          <div class="fg"><label>Rôle</label><input id="tr" placeholder="Café — Tunis"></div>
+          <div class="fg ff"><label>Témoignage</label><textarea id="tq" placeholder="L'expérience du client..."></textarea></div>
+        </div>
+        <button class="add-btn" onclick="addTesti()">➕ Ajouter</button>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-hd"><h3>⭐ Témoignages publiés</h3></div>
+        <div id="testiList" class="card-bd"></div>
+      </div>
+    </div>
+
+    <!-- ── MARKETPLACE ── -->
+    <div class="tab-pane" id="marketplaceTab">
+      <div style="padding:16px;width:100%;height:100%;overflow-y:auto;box-sizing:border-box">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div>
+            <h2 style="font-size:1rem;font-weight:800;margin-bottom:3px">🏪 Applications Marketplace</h2>
+            <div style="font-size:.73rem;color:var(--mu)">Gérez les apps disponibles pour vos clients sur la page marketplace</div>
+          </div>
+          <button class="btn-sm primary" onclick="openAddAppModal()">+ Ajouter une app</button>
+        </div>
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px" id="mpStats">
+          <div class="stat-card"><div class="stat-lbl">Total apps</div><div class="stat-val" id="mpTotal">0</div></div>
+          <div class="stat-card"><div class="stat-lbl">Publiées</div><div class="stat-val" id="mpActiveCount">0</div></div>
+          <div class="stat-card"><div class="stat-lbl">Masquées</div><div class="stat-val" id="mpHidden">0</div></div>
+          <div class="stat-card"><div class="stat-lbl">Achetées</div><div class="stat-val" id="mpSold">0</div></div>
+        </div>
+        <!-- Apps list -->
+        <div id="mpAppsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+          <div style="text-align:center;padding:28px;color:var(--mu);font-size:.8rem">
+            <div style="font-size:2rem;margin-bottom:8px">🏪</div>
+            Chargement des applications...
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD/EDIT APP MODAL -->
+      <div id="mpModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:16px">
+        <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:18px;padding:24px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;position:relative">
+          <button onclick="closeMpModal()" style="position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:7px;border:1px solid var(--bd);background:var(--sf);cursor:pointer;color:var(--mu)">✕</button>
+          <h3 id="mpModalTitle" style="font-size:.92rem;font-weight:800;margin-bottom:16px">Ajouter une application</h3>
+          <input type="hidden" id="mpEditId">
+          <div class="fg"><label>Nom de l'application *</label><input id="mpName" placeholder="App Café & Restaurant"></div>
+          <div class="fg"><label>Icône (emoji) *</label><input id="mpIcon" placeholder="☕" maxlength="4" style="max-width:80px"></div>
+          <div class="fg"><label>Description *</label><textarea id="mpDesc" rows="2" placeholder="Description courte visible par les clients..." style="resize:vertical;min-height:60px;padding:9px 11px;border-radius:9px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;outline:none;width:100%"></textarea></div>
+          <div class="fg">
+            <label>🖼 Miniature (URL ou fichier)</label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input id="mpThumbUrl" type="url" placeholder="https://image.jpg"
+                style="flex:1;min-width:140px"
+                oninput="(function(v){var i=document.getElementById('mpThumbImg'),p=document.getElementById('mpThumbPreview');if(v&&i&&p){i.src=v;p.style.display='block';}else if(p){p.style.display='none';}})(this.value)">
+              <label style="padding:7px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);cursor:pointer;font-size:.76rem;font-weight:600;white-space:nowrap;flex-shrink:0">
+                📁 Fichier
+                <input type="file" id="mpThumbFile" accept="image/*" style="display:none" onchange="previewMpThumb(this)">
+              </label>
+            </div>
+            <div id="mpThumbPreview" style="margin-top:8px;display:none">
+              <img id="mpThumbImg" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;border:1px solid var(--bd)">
+            </div>
+          </div>
+          <div class="fg"><label>URL de la démo (PWA/HTML) *</label><input id="mpUrl" type="url" placeholder="https://..."></div>
+          <div class="fg"><label>Prix (ex: 299 DT)</label><input id="mpPrice" placeholder="299 DT"></div>
+          <div class="fg"><label>Prix original barré (ex: 450 DT)</label><input id="mpOrigPrice" placeholder="450 DT"></div>
+          <div class="fg"><label>Catégorie</label>
+            <select id="mpCat" style="padding:9px 11px;border-radius:9px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;width:100%">
+              <option value="cafe">☕ Café / Restaurant</option>
+              <option value="commerce">🏪 Commerce</option>
+              <option value="services">⚙️ Services</option>
+              <option value="gestion">📊 Gestion</option>
+              <option value="autre">📦 Autre</option>
+            </select>
+          </div>
+          <div class="fg"><label>Tags (séparés par virgule)</label><input id="mpTags" placeholder="Commandes, Caisse, Stock"></div>
+          <div class="fg"><label>Partenaire (optionnel)</label><input id="mpPartner" placeholder="Café Beb Lmdina"></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <input type="checkbox" id="mpActive" checked style="accent-color:var(--green);width:15px;height:15px">
+            <label for="mpActive" style="font-size:.82rem;font-weight:600;cursor:pointer">Publiée sur la marketplace</label>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="btn-sm primary" onclick="saveMpApp()" style="flex:1;padding:10px">💾 Sauvegarder</button>
+            <button class="btn-sm" onclick="closeMpModal()" style="padding:10px">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end tab-content -->
+</div><!-- end admin-view -->
+
+</div><!-- end #adminView -->
+
+<!-- ── FLOATING CHAT BUBBLE ── -->
+<button class="chat-bubble-btn" id="chatBubbleBtn" onclick="toggleChatOverlay()" title="Messages client">
+  <i class="ph-bold ph-chat-dots"></i>
+  <div class="chat-unread-dot" id="chatUnreadDot"></div>
+</button>
+
+<!-- ── CHAT OVERLAY PANEL ── -->
+<div class="chat-overlay" id="chatOverlay">
+  <div class="chat-ov-hd">
+    <div>
+      <h4 id="chatOvTitle">💬 Messages</h4>
+      <div style="font-size:.66rem;color:var(--mu)" id="chatOvSub"></div>
+    </div>
+    <button class="chat-ov-close" onclick="toggleChatOverlay()"><i class="ph-bold ph-x"></i></button>
+  </div>
+  <div class="chat-ov-msgs" id="chatOvMsgs"></div>
+  <div class="chat-ov-input">
+    <textarea class="chat-ov-ta" id="chatOvInput" rows="1" placeholder="Message..."
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAdminMsgOv()}"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,70)+'px'"></textarea>
+    <button class="chat-ov-send" onclick="sendAdminMsgOv()"><i class="ph-bold ph-paper-plane-tilt"></i></button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- PWA INSTALL BANNER -->
+<div id="pwaInstallBanner">
+  <div class="pwa-icon" style="background:linear-gradient(135deg,var(--ac2),var(--ac))"><i class="ph-bold ph-lightning"></i></div>
+  <div class="pwa-info">
+    <div class="pwa-title">Installer Admin Walaup</div>
+    <div class="pwa-sub">Recevez les commandes sans ouvrir le navigateur</div>
+  </div>
+  <button class="pwa-install-btn" onclick="installPWA()">Installer</button>
+  <button class="pwa-dismiss" onclick="dismissPWA()"><i class="ph-bold ph-x"></i></button>
+</div>
+
+<!-- NOTIF BADGE -->
+<div id="notifBadge" class="notif-badge">
+  <div class="notif-dot"></div>
+  <div class="notif-text"></div>
+  <button onclick="this.parentElement.classList.remove('show')" style="background:none;border:none;color:var(--mu);cursor:pointer;padding:0;width:18px;height:18px;flex-shrink:0"><i class="ph-bold ph-x"></i></button>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<!-- Shared -->
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/effects.js"></script>  <!-- ← ajouter ici -->
+<!-- Admin logic -->
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Walaup — Espace Client</title>
+<!-- Remplacer l'ancienne ligne favicon par : -->
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/effects.css"> 
+<link rel="stylesheet" href="css/client.css">
+<link rel="manifest" href="manifest-client.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Walaup">
+<meta name="theme-color" content="#ffd600">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+</head>
+<body>
+
+<div class="glow-line"></div>
+<div class="dot-grid"></div>
+<div class="mesh">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- PROTOCOL WARNING -->
+<div id="protoWarn">
+  <div class="pw-card">
+    <div style="font-size:2.8rem">⚠️</div>
+    <h2>Fichier ouvert en local (file://)</h2>
+    <p>Firebase Auth nécessite <strong>http://</strong> ou <strong>https://</strong>.</p>
+    <div class="pw-cmd">python -m http.server 8080</div>
+    <div class="pw-cmd">http://localhost:8080/client.html</div>
+  </div>
+</div>
+
+<!-- ══ AUTH ══ -->
+<div id="authView" style="display:flex">
+  <div class="auth-wrap">
+    <div class="auth-logo"><img src="icons/logo-full.svg" alt="Walaup" width="140" style="display:block;margin:0 auto 12px"></div>
+    <div class="auth-card">
+      <h2>Connexion</h2>
+      <p class="sub">Accédez à votre espace client</p>
+      <div class="msg" id="msgBox"></div>
+      <div class="tabs">
+        <button class="tab on" onclick="switchTab('google',this)">🔵 Google</button>
+        <button class="tab" onclick="switchTab('phone',this)">📱 Téléphone</button>
+        <button class="tab" onclick="switchTab('email',this)">✉️ Email</button>
+      </div>
+      <!-- GOOGLE -->
+      <div class="panel on" id="pGoogle">
+        <button class="btn-google" id="gBtn" onclick="doGoogle()">
+          <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continuer avec Google
+        </button>
+        <p style="font-size:.77rem;color:var(--mu);text-align:center">Connexion en 1 clic — recommandé</p>
+      </div>
+      <!-- PHONE -->
+      <div class="panel" id="pPhone">
+        <div id="ph1">
+          <div class="fg"><label>Numéro tunisien</label>
+            <div class="ph-row"><div class="ph-pfx">🇹🇳 +216</div><input type="tel" id="phNum" placeholder="XX XXX XXX" maxlength="8" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+          </div>
+          <div id="recaptcha-container"></div>
+          <button class="btn-main" id="sendBtn" onclick="sendOTP()">Envoyer le code SMS →</button>
+        </div>
+        <div id="ph2" style="display:none">
+          <p style="font-size:.78rem;color:var(--mu);text-align:center;margin-bottom:8px">Code envoyé au <strong id="phSent" style="color:var(--tx)"></strong></p>
+          <div class="otp-row">
+            <input class="ob" type="tel" maxlength="1" id="o1" oninput="onxt(this,'o2')" onkeydown="obck(event,'')">
+            <input class="ob" type="tel" maxlength="1" id="o2" oninput="onxt(this,'o3')" onkeydown="obck(event,'o1')">
+            <input class="ob" type="tel" maxlength="1" id="o3" oninput="onxt(this,'o4')" onkeydown="obck(event,'o2')">
+            <input class="ob" type="tel" maxlength="1" id="o4" oninput="onxt(this,'o5')" onkeydown="obck(event,'o3')">
+            <input class="ob" type="tel" maxlength="1" id="o5" oninput="onxt(this,'o6')" onkeydown="obck(event,'o4')">
+            <input class="ob" type="tel" maxlength="1" id="o6" oninput="onxt(this,'')"  onkeydown="obck(event,'o5')">
+          </div>
+          <button class="btn-main" id="verBtn" onclick="verifyOTP()">Vérifier →</button>
+          <p style="text-align:center;margin-top:10px;font-size:.77rem;color:var(--mu)">Pas reçu ? <button class="resend-b" id="rsBtn" onclick="resetPhone()">Renvoyer</button></p>
+          <span class="back-ln" onclick="showPh1()">← Changer de numéro</span>
+        </div>
+      </div>
+      <!-- EMAIL -->
+      <div class="panel" id="pEmail">
+        <div class="etabs">
+          <button class="etab on" onclick="emode('login',this)">Connexion</button>
+          <button class="etab" onclick="emode('register',this)">Créer un compte</button>
+        </div>
+        <div class="fg" id="nameF" style="display:none"><label>Nom complet</label><input type="text" id="eName" placeholder="Votre nom"></div>
+        <div class="fg"><label>Email</label><input type="email" id="eEmail" placeholder="votre@email.com"></div>
+        <div class="fg"><label>Mot de passe</label><input type="password" id="ePass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doEmail()"></div>
+        <div id="fgotWrap" style="text-align:right;margin:-6px 0 10px"><button onclick="resetEmail()" style="background:none;border:none;color:var(--ac);font-size:.76rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">Mot de passe oublié ?</button></div>
+        <button class="btn-main" id="eBtn" onclick="doEmail()">Connexion →</button>
+      </div>
+      <p style="font-size:.7rem;color:var(--mu2);text-align:center;margin-top:18px">Connexion sécurisée · Walaup</p>
+    </div>
+    <p style="text-align:center;margin-top:16px;font-size:.79rem;color:var(--mu)"><a href="/" style="color:var(--ac)">← Retour au site</a></p>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="dashView">
+  <div class="topbar">
+    <div class="tbl"><a href="index.html" class="brand-wordmark" style="font-size:1.1rem">Walaup</a></div>
+    <div class="tbr">
+      <div class="uchip">
+        <img class="uav" id="dAv" src="" alt="" style="display:none">
+        <div class="uavfb" id="dAvFb" style="display:none"></div>
+        <span class="unm" id="dNm"></span>
+      </div>
+      <button class="sout" onclick="doSignOut()">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="dash-body" id="dashBody">
+
+    <!-- ── LEFT : projects list + profile ── -->
+    <div class="dash-left" id="dashLeft">
+      <div id="dashLoader" class="lv"><div class="splg"></div></div>
+
+      <!-- NO LEAD -->
+      <div id="noLeadState" style="display:none" class="dl-scroll">
+        <div class="no-lead-card">
+          <div class="nl-icon">✨</div>
+          <h3>Bienvenue sur Walaup</h3>
+          <p>Créez votre première application sur mesure ou explorez notre marketplace.</p>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:4px">
+            <a href="estimateur.html" class="btn-go-est">🎯 Créer mon application</a>
+            <a href="marketplace.html" class="btn-go-mkt">🏪 Voir le marketplace</a>
+          </div>
+        </div>
+        <div class="profile-card" style="margin-top:12px">
+          <img class="profile-av" id="nlProfAv" src="" style="display:none">
+          <div class="profile-av-fb" id="nlProfAvFb" style="display:none"></div>
+          <div>
+            <div class="profile-name" id="nlProfName"></div>
+            <div class="profile-email" id="nlProfEmail"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HAS LEADS -->
+      <div id="hasLeadState" style="display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0">
+        <!-- Profile strip -->
+        <div class="profile-strip">
+          <img class="profile-av-sm" id="profAv" src="" style="display:none">
+          <div class="profile-av-fb-sm" id="profAvFb" style="display:none"></div>
+          <div class="profile-strip-info">
+            <div class="profile-name-sm" id="profName"></div>
+            <div class="profile-email-sm" id="profEmail"></div>
+          </div>
+          <a href="estimateur.html" class="btn-new-proj" title="Nouvelle demande"><i class="ph-bold ph-plus"></i></a>
+        </div>
+
+        <!-- Projects list -->
+        <div class="projects-header">
+          <span>Mes projets</span>
+          <span class="proj-count" id="projCount"></span>
+        </div>
+        <div class="projects-list" id="projectsList"></div>
+      </div>
+    </div>
+
+    <!-- ── CENTER : project detail ── -->
+    <div class="dash-center" id="dashCenter">
+      <!-- Empty state -->
+      <div id="centerEmpty" style="display:flex;flex:1;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--mu)">
+        <div style="font-size:3rem">👈</div>
+        <div style="font-weight:700;font-size:.9rem">Sélectionnez un projet</div>
+        <div style="font-size:.76rem;text-align:center;max-width:200px;line-height:1.6">Cliquez sur l'un de vos projets pour voir son avancement</div>
+      </div>
+
+      <!-- Project detail -->
+      <div id="centerContent" style="display:none;flex-direction:column;gap:13px">
+
+        <!-- Status card -->
+        <div class="status-card" id="statusCard">
+          <div class="sc-top">
+            <div class="sc-info">
+              <div class="sc-title" id="scTitle">Application</div>
+              <div class="sc-sub" id="scSub"></div>
+            </div>
+            <div class="pill pn" id="spill">🔵 Nouvelle</div>
+          </div>
+          <div class="prog-steps" style="margin-top:13px">
+            <div class="prog-line"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+            <div class="ps" id="ps1"><div class="psd">1</div><div class="psl">Reçue</div></div>
+            <div class="ps" id="ps2"><div class="psd">2</div><div class="psl">Discussion</div></div>
+            <div class="ps" id="ps3"><div class="psd">3</div><div class="psl">Démo</div></div>
+            <div class="ps" id="ps4"><div class="psd">4</div><div class="psl">Paiement</div></div>
+            <div class="ps" id="ps5"><div class="psd">5</div><div class="psl">Livrée ✓</div></div>
+          </div>
+        </div>
+
+        <!-- Payment banner -->
+        <div class="pay-banner" id="payBanner">
+          <div class="pb-title">💳 Paiement requis</div>
+          <div class="pb-desc" id="pbDesc">Votre démo a été validée ! Réglez votre commande pour recevoir la version finale.</div>
+          <button class="btn-pay" onclick="openPayOv()">💳 Régler maintenant</button>
+        </div>
+        <!-- Payment confirmed banner -->
+        <div id="payPaidBanner" class="pay-banner pay-banner-ok" style="display:none">
+          <div class="pb-title" style="color:var(--green)">✅ Paiement confirmé !</div>
+          <div class="pb-desc">Votre paiement a été reçu. Notre équipe prépare votre application finale.</div>
+        </div>
+
+        <!-- App details (collapsible) -->
+        <div class="detail-card" id="detailCard">
+          <div class="dc-hd" onclick="toggleDetail()">
+            <span>📋 Détails de votre projet</span>
+            <span class="dc-arrow" id="dcArrow">▼</span>
+          </div>
+          <div class="dc-bd" id="appDetails" style="display:none"></div>
+        </div>
+
+        <!-- Demos section -->
+        <div class="demos-wrap" id="demosWrap" style="display:none">
+          <div class="demos-hd">
+            <h3>🎯 Versions de démo <span class="demo-cnt" id="demoCnt">0</span></h3>
+            <span id="modifLeft" class="modif-counter"></span>
+          </div>
+          <div id="demosList"></div>
+        </div>
+
+        <!-- Waiting -->
+        <div id="awaitDemo" style="display:none">
+          <div class="await-card">
+            <div class="await-icon">🔧</div>
+            <div class="await-title">Démo en préparation</div>
+            <div class="await-sub">Notre équipe développe votre application.<br>Vous serez notifié dès qu'elle est prête à tester.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── RIGHT : chat ── -->
+    <div class="dash-right">
+      <div class="chat-hd">
+        <div>
+          <h3>💬 Messages</h3>
+          <div class="chat-hd-sub" id="chatHdSub">Walaup</div>
+        </div>
+        <span class="chat-unread" id="chatUnread"></span>
+      </div>
+      <div class="chat-msgs" id="chatMsgs">
+        <div class="chat-empty">👈 Sélectionnez un projet pour voir la messagerie.</div>
+      </div>
+      <div class="chat-input-wrap" id="chatInputWrap" style="display:none">
+        <input type="file" id="imgUpload" accept="image/*" style="display:none" onchange="sendImage(this)">
+        <div class="chat-extras">
+          <button class="extra-btn" title="Image" onclick="document.getElementById('imgUpload').click()">🖼</button>
+          <button class="extra-btn" id="voiceBtn" title="Vocal" onclick="toggleVoice()">🎤</button>
+          <span class="rec-timer" id="recTimer">⏺ <span id="recTime">0:00</span></span>
+        </div>
+        <div class="chat-row">
+          <textarea class="chat-ta" id="chatInput" placeholder="Votre message..." rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
+          <button class="send-btn" onclick="sendMsg()"><i class="ph-bold ph-paper-plane-tilt"></i></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DEMO OVERLAY -->
+<div id="demoOv">
+  <div class="ov-hd">
+    <div style="display:flex;align-items:center;gap:9px">
+      <h3>🎯 Test démo</h3>
+      <span class="ov-ver-badge" id="ovVer">v1</span>
+    </div>
+    <div style="display:flex;gap:7px;align-items:center">
+      <button class="btn-ov-improve" id="ovImpBtn" onclick="toggleOvImprove()">✏️ Modif.</button>
+      <button class="btn-ov-approve" id="ovApprBtn" onclick="approveFromOv()">✅ Valider</button>
+      <button class="btn-ov-close" onclick="closeOv()"><i class="ph-bold ph-x"></i></button>
+    </div>
+  </div>
+  <iframe class="ov-frame" id="ovFrame" src="" sandbox="allow-scripts allow-forms allow-popups"></iframe>
+  <div class="ov-improve-bar" id="ovImproveBar">
+    <textarea class="ov-ta" id="ovImpText" placeholder="Décrivez les modifications souhaitées..." rows="2"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,72)+'px'"></textarea>
+    <button class="btn-ov-send" onclick="sendImproveMsg()">Envoyer →</button>
+  </div>
+</div>
+
+<!-- PAYMENT OVERLAY -->
+<div id="payOv">
+  <div class="pay-card">
+    <button class="pay-close" onclick="closePayOv()">✕</button>
+    <div style="text-align:center;font-size:2rem;margin-bottom:9px">💳</div>
+    <h2>Finaliser le paiement</h2>
+    <p class="pay-sub">Réglez votre commande pour recevoir la version finale.</p>
+    <div class="pay-amount">
+      <div class="pa-price" id="payAmt">—</div>
+      <div class="pa-lbl">Montant estimé</div>
+    </div>
+    <div id="payDemoList" style="margin-bottom:14px;padding:10px 0;border-bottom:1px solid var(--bd)"></div>
+    <div class="pay-methods">
+      <div class="pay-method" onclick="selPay(this,'virement')"><div class="pm-icon">🏦</div><div><div class="pm-name">Virement bancaire</div><div class="pm-desc">RIB après confirmation</div></div></div>
+      <div class="pay-method" onclick="selPay(this,'cash')"><div class="pm-icon">💵</div><div><div class="pm-name">Espèces</div><div class="pm-desc">En agence ou livraison</div></div></div>
+      <div class="pay-method" onclick="selPay(this,'d17')"><div class="pm-icon">📱</div><div><div class="pm-name">D17 / ClickPay</div><div class="pm-desc">Paiement mobile</div></div></div>
+    </div>
+    <button class="btn-pay-confirm" onclick="confirmPay()">✅ Confirmer</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- PWA INSTALL BANNER -->
+<div id="pwaInstallBanner">
+  <div class="pwa-icon"><i class="ph-bold ph-lightning"></i></div>
+  <div class="pwa-info">
+    <div class="pwa-title">Installer Walaup</div>
+    <div class="pwa-sub">Accès rapide + notifications</div>
+  </div>
+  <button class="pwa-install-btn" onclick="installPWA()">Installer</button>
+  <button class="pwa-dismiss" onclick="dismissPWA()"><i class="ph-bold ph-x"></i></button>
+</div>
+
+<!-- NOTIF BADGE -->
+<div id="notifBadge" class="notif-badge">
+  <div class="notif-dot"></div>
+  <div class="notif-text"></div>
+  <button onclick="this.parentElement.classList.remove('show')" style="background:none;border:none;color:var(--mu);cursor:pointer;padding:0;width:18px;height:18px;flex-shrink:0"><i class="ph-bold ph-x"></i></button>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/effects.js"></script> 
+<script src="js/client.js"></script>
+</body>
+</html>

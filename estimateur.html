@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Walaup — Estimateur de Prix</title>
+<!-- Remplacer l'ancienne ligne favicon par : -->
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/effects.css"> 
+<link rel="stylesheet" href="css/estimateur.css">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+
+<style>
+/* ── Contrainte largeur cartes estimateur ── */
+.wrap,
+.card,
+.results {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card,
+.results {
+  padding-left: clamp(16px, 4vw, 32px);
+  padding-right: clamp(16px, 4vw, 32px);
+}
+
+/* Padding latéral page entière sur desktop */
+@media (min-width: 768px) {
+  body {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* ── Champ nom application ── */
+.field-group { display:flex; flex-direction:column; gap:6px; }
+.field-label {
+  display:flex; align-items:center; gap:8px;
+  font-size:.72rem; font-weight:700; color:var(--muted2);
+  text-transform:uppercase; letter-spacing:.07em;
+}
+.field-required {
+  font-size:.65rem; font-weight:600; text-transform:uppercase;
+  letter-spacing:.06em; color:#f43f5e;
+  background:rgba(244,63,94,.12); border:1px solid rgba(244,63,94,.25);
+  padding:2px 7px; border-radius:20px;
+}
+.field-input {
+  width:100%; padding:12px 14px; box-sizing:border-box;
+  border-radius:10px; border:1.5px solid var(--border);
+  background:rgba(255,255,255,.05); color:var(--text);
+  font-family:var(--font-body,inherit); font-size:.92rem; font-weight:500;
+  outline:none; transition:border-color .2s, box-shadow .2s;
+}
+.field-input::placeholder { color:var(--muted); font-weight:400; }
+.field-input:focus {
+  border-color:var(--c-cyan,#00d4ff);
+  box-shadow:0 0 0 3px rgba(0,212,255,.1);
+}
+.field-input.input-error {
+  border-color:#f43f5e !important;
+  box-shadow:0 0 0 3px rgba(244,63,94,.12) !important;
+  animation:shake .35s ease;
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+.field-hint { font-size:.72rem; color:var(--muted); line-height:1.4; }
+
+/* ── Custom select dark ── */
+.custom-select-wrap { position:relative; }
+.custom-select-trigger {
+  width:100%; padding:11px 38px 11px 14px; box-sizing:border-box;
+  display:flex; align-items:center; justify-content:space-between;
+  border-radius:10px; border:1.5px solid var(--border);
+  background:rgba(255,255,255,.05); color:var(--text);
+  font-family:var(--font-body,inherit); font-size:.88rem;
+  cursor:pointer; outline:none; text-align:left;
+  transition:border-color .2s, box-shadow .2s;
+}
+.custom-select-trigger:hover { border-color:rgba(255,255,255,.2); }
+.custom-select-trigger:focus,
+.custom-select-wrap.open .custom-select-trigger {
+  border-color:var(--c-cyan,#00d4ff);
+  box-shadow:0 0 0 3px rgba(0,212,255,.1);
+}
+.cs-arrow {
+  flex-shrink:0; opacity:.6;
+  transition:transform .2s ease;
+}
+.custom-select-wrap.open .cs-arrow { transform:rotate(180deg); }
+
+.custom-select-list {
+  display:none; position:fixed; z-index:9999;
+  background:#0f1623 !important; border:1.5px solid rgba(255,255,255,.13);
+  border-radius:12px; overflow-x:hidden; overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.8), 0 0 0 1px rgba(0,212,255,.1);
+  max-height:260px;
+}
+.custom-select-wrap.open .custom-select-list { display:block; }
+
+.cs-option {
+  padding:11px 16px; font-size:.88rem; color:rgba(221,230,245,.85);
+  background:#0f1623 !important;
+  cursor:pointer; transition:background .15s, color .15s;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.cs-option:last-child { border-bottom:none; }
+.cs-option:hover { background:rgba(0,212,255,.08); color:#fff; }
+.cs-option.selected { background:rgba(0,212,255,.12); color:var(--c-cyan,#00d4ff); font-weight:600; }
+
+/* Scrollbar custom dans la liste */
+.custom-select-list::-webkit-scrollbar { width:4px; }
+.custom-select-list::-webkit-scrollbar-track { background:transparent; }
+.custom-select-list::-webkit-scrollbar-thumb { background:rgba(255,255,255,.15); border-radius:2px; }
+</style>
+</head>
+<body>
+<div class="glow-line"></div>
+<div class="dot-grid"></div>
+
+<div class="wrap">
+
+<header>
+  <div class="live-badge"><div class="dot-pulse"></div>Estimation de Prix · Gratuit</div>
+  <h1 style="font-family:var(--font-display);font-weight:900;letter-spacing:-.04em">Votre application,<br>votre <span class="grad" style="font-style:normal">investissement.</span></h1>
+  <p class="sub">Décrivez votre projet et sélectionnez les fonctionnalités souhaitées — obtenez une <strong style="color:var(--c-cyan)">estimation de prix instantanée</strong> pour votre application sur mesure.</p>
+</header>
+
+
+</div><!-- /wrap -->
+
+<!-- STEP 1 : DESCRIPTION -->
+<div class="card">
+  <div class="card-shine"></div>
+  <div class="c-title">
+    <div class="stepn">1</div>
+    <span style="font-size:19px">✍️</span>
+    Décrivez votre application
+  </div>
+  <!-- Nom de l'application — obligatoire -->
+  <div class="field-group" style="margin-bottom:18px">
+    <label for="appNameInput" class="field-label">
+      Nom de votre application
+      <span class="field-required">obligatoire</span>
+    </label>
+    <input
+      type="text"
+      id="appNameInput"
+      class="field-input"
+      placeholder="Ex : CaféPro, StockMaster, MonBusiness..."
+      maxlength="60"
+      oninput="this.classList.remove('input-error')"
+    >
+    <div class="field-hint">Ce nom apparaîtra sur votre application et dans les communications.</div>
+  </div>
+
+  <!-- Sélecteur domaine — custom dark -->
+  <div class="field-group" style="margin-bottom:18px">
+    <label class="field-label">
+      Secteur d'activité
+      <span style="font-weight:400;opacity:.5;font-size:.75rem;text-transform:none;letter-spacing:0">(optionnel)</span>
+    </label>
+    <div class="custom-select-wrap" id="customSelectWrap">
+      <button type="button" class="custom-select-trigger" id="customSelectTrigger" onclick="toggleCustomSelect()">
+        <span id="customSelectLabel">— Choisissez votre secteur —</span>
+        <svg class="cs-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="custom-select-list" id="customSelectList">
+        <div class="cs-option" onclick="pickDomain(this, '')">— Aucun secteur —</div>
+        <div class="cs-option" onclick="pickDomain(this, 'Café / Restaurant')">☕ Café / Restaurant</div>
+        <div class="cs-option" onclick="pickDomain(this, 'Commerce / Épicerie')">🛒 Commerce / Épicerie</div>
+        <div class="cs-option" onclick="pickDomain(this, 'Grossiste / Recharge')">🔄 Grossiste / Recharge</div>
+        <div class="cs-option" onclick="pickDomain(this, 'Pharmacie')">💊 Pharmacie</div>
+        <div class="cs-option" onclick="pickDomain(this, 'École / Crèche')">🏫 École / Crèche</div>
+        <div class="cs-option" onclick="pickDomain(this, 'Livraison')">🍕 Livraison</div>
+        <div class="cs-option" onclick="pickDomain(this, 'Salon / Beauté')">💇 Salon / Beauté</div>
+        <div class="cs-option" onclick="pickDomain(this, 'BTP / Chantier')">🏗️ BTP / Chantier</div>
+        <div class="cs-option" onclick="pickDomain(this, 'Garage / Auto')">🚗 Garage / Auto</div>
+        <div class="cs-option" onclick="pickDomain(this, 'Boutique / Mode')">👗 Boutique / Mode</div>
+        <div class="cs-option" onclick="pickDomain(this, 'Cabinet médical')">🏥 Cabinet médical</div>
+        <div class="cs-option" onclick="pickDomain(this, 'Services / Autre')">⚙️ Services / Autre</div>
+      </div>
+    </div>
+    <!-- Garder l'input caché pour compatibilité avec estimateur.js -->
+    <select id="domainSelect" onchange="selectDomain(this.value)" style="display:none">
+      <option value="">— Choisissez votre secteur —</option>
+      <option value="Café / Restaurant">Café / Restaurant</option>
+      <option value="Commerce / Épicerie">Commerce / Épicerie</option>
+      <option value="Grossiste / Recharge">Grossiste / Recharge</option>
+      <option value="Pharmacie">Pharmacie</option>
+      <option value="École / Crèche">École / Crèche</option>
+      <option value="Livraison">Livraison</option>
+      <option value="Salon / Beauté">Salon / Beauté</option>
+      <option value="BTP / Chantier">BTP / Chantier</option>
+      <option value="Garage / Auto">Garage / Auto</option>
+      <option value="Boutique / Mode">Boutique / Mode</option>
+      <option value="Cabinet médical">Cabinet médical</option>
+      <option value="Services / Autre">Services / Autre</option>
+    </select>
+  </div>
+
+  <textarea id="descInput"
+    placeholder="Ex : J'ai un café avec 4 employés au centre-ville de Tunis. Je veux gérer les commandes par table, la caisse et les présences de mes employés.&#10;&#10;💡 Plus vous êtes précis sur votre activité et vos besoins, plus l'estimation sera précise."></textarea>
+
+
+</div>
+
+<!-- STEP 2 : FONCTIONNALITÉS -->
+<div class="card">
+  <div class="card-shine"></div>
+  <div class="c-title">
+    <div class="stepn">2</div>
+    <span style="font-size:19px">🧩</span>
+    Fonctionnalités
+    <span class="rhint">Cliquez pour sélectionner</span>
+  </div>
+  <div class="slbl">🔹 Base</div><div class="feat-grid" id="g-base"></div>
+  <div class="slbl">🔹 Business</div><div class="feat-grid" id="g-business"></div>
+  <div class="slbl">🔹 Avancées</div><div class="feat-grid" id="g-avancees"></div>
+  <div class="slbl">🔹 Mobile</div><div class="feat-grid" id="g-mobile"></div>
+  <div class="slbl">🔹 Extras</div><div class="feat-grid" id="g-extras"></div>
+  <div class="div"></div>
+  <div class="c-title" style="margin-bottom:14px"><span style="font-size:19px">⚡</span>Niveau de complexité</div>
+  <div class="comp-row">
+    <button class="comp-btn simple act" onclick="setComp('simple',this)">🟢 Simple<div class="extra" id="ex-simple">+0 DT</div></button>
+    <button class="comp-btn moyenne" onclick="setComp('moyenne',this)">🟡 Moyenne<div class="extra" id="ex-moyenne">+100 DT</div></button>
+    <button class="comp-btn avancee" onclick="setComp('avancee',this)">🔴 Avancée<div class="extra" id="ex-avancee">+300 DT</div></button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results" id="results">
+  <div class="price-bar">
+    <div class="price-main">
+      <div class="amt" id="rTotal">0 DT</div>
+      <div class="lbl">Prix estimatif de base · non contractuel</div>
+    </div>
+    <div class="price-stats">
+      <div class="pstat"><div class="v" id="rDelai">—</div><div class="l">⏱ Délai</div></div>
+      <div class="pstat"><div class="v" id="rMaint">—</div><div class="l">🔄 /mois</div></div>
+      <div class="pstat"><div class="v" id="rMods">0</div><div class="l">🧩 Modules</div></div>
+    </div>
+  </div>
+  <div class="sel-tags" id="selTags"></div>
+
+  <div class="monetize-toggle" id="monetizeToggle" onclick="toggleMonetize()">
+    <div class="mt-row">
+      <div class="mt-icon">💰</div>
+      <div class="mt-text">
+        <div class="mt-title">Transformer mon app en source de revenu</div>
+        <div class="mt-sub">Publiez votre application sur notre plateforme et partagez les revenus</div>
+      </div>
+      <div class="mt-switch"></div>
+    </div>
+  </div>
+
+  <div class="marketplace-addon" id="marketplaceAddon">
+    <div class="ma-tag">🔥 OPTION MARKETPLACE</div>
+    <div class="ma-title">Votre app → Un produit SaaS vendu à d'autres entreprises</div>
+    <p class="ma-desc">Nous intégrons votre application dans notre plateforme. Vous touchez <strong style="color:var(--c-green)">60–70%</strong> des revenus générés. Nous conservons <strong style="color:var(--c-amber)">30–40%</strong> pour la maintenance et la distribution.</p>
+    <div class="revenue-calc">
+      <div class="rc-title">📊 Simulateur de revenus mensuels</div>
+      <div class="rc-slider-row">
+        <label>Nombre de clients abonnés</label>
+        <input type="range" id="sliderClients" min="1" max="50" value="10" oninput="calcRevenue()">
+        <span class="rc-val" id="valClients">10</span>
+      </div>
+      <div class="rc-slider-row">
+        <label>Prix abonnement / client</label>
+        <input type="range" id="sliderPrice" min="20" max="150" value="30" step="5" oninput="calcRevenue()">
+        <span class="rc-val" id="valPrice">30 DT</span>
+      </div>
+      <div class="revenue-grid">
+        <div class="rev-box total"><div class="rv" id="rvTotal">300 DT</div><div class="rl">Total /mois</div></div>
+        <div class="rev-box client"><div class="rv" id="rvClient">195 DT</div><div class="rl">Votre part</div></div>
+        <div class="rev-box platform"><div class="rv" id="rvPlatform">105 DT</div><div class="rl">Commission</div></div>
+      </div>
+      <div class="rev-example" id="revExample">Si <strong>10 entreprises</strong> utilisent votre app à <strong>30 DT/mois</strong> → vous gagnez <strong style="color:var(--c-green)">195 DT/mois</strong> passivement.</div>
+    </div>
+  </div>
+
+  <div class="packs-header">
+    <div class="packs-title">📦 Choisissez votre formule</div>
+    <div class="packs-sub">Trois niveaux selon votre objectif — setup unique + abonnement mensuel</div>
+  </div>
+  <div class="packs-grid">
+    <div class="pack essentiel" onclick="choosePack(this,'essentiel')">
+      <div class="pack-top-bar"></div><div class="pack-icon">🟢</div>
+      <div class="pack-name">ESSENTIEL</div><div class="pack-tagline">Pour petits business · Usage privé interne</div>
+      <div class="pack-price-block">
+        <div class="pack-setup" id="setup-essentiel">— DT<span class="unit">setup</span></div>
+        <div class="pack-monthly" id="monthly-essentiel">+ 20 DT / mois</div>
+      </div>
+      <ul class="pack-features">
+        <li><span class="ck">✓</span>App personnalisée complète</li>
+        <li><span class="ck">✓</span>Fonctionnalités sélectionnées</li>
+        <li><span class="ck">✓</span>Support technique inclus</li>
+        <li><span class="ck">✓</span>Hébergement + domaine</li>
+        <li class="no"><span class="ck">✕</span>Revente non incluse</li>
+        <li class="no"><span class="ck">✕</span>Marketplace non incluse</li>
+      </ul>
+      <div style="font-size:11px;color:#10b981;text-align:center;margin-bottom:9px;opacity:.85">💳 Paiement après validation de votre démo</div>
+      <button class="pack-cta" onclick="event.stopPropagation();choosePack(this.closest('.pack'),'essentiel')">Choisir Essentiel</button>
+    </div>
+    <div class="pack pro" onclick="choosePack(this,'pro')">
+      <div class="pack-top-bar"></div><div class="pack-badge">⭐ RECOMMANDÉ</div><div class="pack-icon">🔵</div>
+      <div class="pack-name">PRO</div><div class="pack-tagline">Pour optimiser votre business · Option monétisation</div>
+      <div class="pack-price-block">
+        <div class="pack-setup" id="setup-pro">— DT<span class="unit">setup</span></div>
+        <div class="pack-monthly" id="monthly-pro">+ 30–50 DT / mois</div>
+        <div class="pack-market-price" id="market-price-pro">+ activation marketplace incluse</div>
+      </div>
+      <ul class="pack-features">
+        <li><span class="ck">✓</span>Tout le pack Essentiel</li>
+        <li><span class="ck">✓</span>Design premium inclus</li>
+        <li><span class="ck">✓</span>Optimisation performances</li>
+        <li><span class="ck">✓</span>Tableau de bord avancé</li>
+        <li><span class="ck">✓</span>Option monétisation activable</li>
+        <li id="pro-mfeat" style="display:none"><span class="ck">✓</span><span style="color:var(--c-amber)">Marketplace activée !</span></li>
+      </ul>
+      <div style="font-size:11px;color:#10b981;text-align:center;margin-bottom:9px;opacity:.85">💳 Paiement après validation de votre démo</div>
+      <button class="pack-cta" onclick="event.stopPropagation();choosePack(this.closest('.pack'),'pro')">Choisir Pro ⭐</button>
+    </div>
+    <div class="pack partenaire" onclick="choosePack(this,'partenaire')">
+      <div class="pack-top-bar"></div><div class="pack-badge">🔥 INNOVATION</div><div class="pack-icon">🔴</div>
+      <div class="pack-name">PARTENAIRE</div><div class="pack-tagline">Transformez votre app en revenu passif mensuel</div>
+      <div class="pack-price-block">
+        <div class="pack-setup" id="setup-partenaire">— DT<span class="unit">setup</span></div>
+        <div class="pack-monthly" id="monthly-partenaire">+ 50–100 DT / mois</div>
+        <div class="pack-market-price" id="market-price-partenaire" style="display:block">+ 60–70% des revenus marketplace</div>
+      </div>
+      <ul class="pack-features">
+        <li><span class="ck">✓</span>Tout le pack Pro</li>
+        <li><span class="ck">✓</span>Publication sur notre plateforme</li>
+        <li><span class="ck">✓</span>Vous gagnez 60–70% des revenus</li>
+        <li><span class="ck">✓</span>Nous gérons la vente pour vous</li>
+        <li><span class="ck">✓</span>Évolution vers SaaS possible</li>
+        <li><span class="ck">✓</span>Accompagnement stratégique</li>
+      </ul>
+      <div style="font-size:11px;color:#10b981;text-align:center;margin-bottom:9px;opacity:.85">💳 Paiement après validation de votre démo</div>
+      <button class="pack-cta" onclick="event.stopPropagation();choosePack(this.closest('.pack'),'partenaire')">🔥 Devenir Partenaire</button>
+    </div>
+  </div>
+  <div class="info-box">
+    💡 <strong>Pourquoi le Pack Partenaire ?</strong> Si votre application peut être utile à d'autres entreprises du même secteur, nous pouvons la proposer sur notre plateforme. Vous ne vendez plus seulement un outil — vous vendez <strong>un système qui génère des revenus passifs</strong>.
+  </div>
+</div><!-- /results -->
+
+<footer>Estimation non contractuelle · Prix en Dinar Tunisien (DT)</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/effects.js"></script> 
+<script src="js/estimateur.js"></script>
+
+<script>
+/* ── Custom Select ── */
+var _selectedDomainValue = '';
+
+function toggleCustomSelect() {
+  var wrap    = document.getElementById('customSelectWrap');
+  var list    = document.getElementById('customSelectList');
+  var trigger = document.getElementById('customSelectTrigger');
+  var isOpen  = wrap.classList.contains('open');
+  if (isOpen) { wrap.classList.remove('open'); return; }
+  // Positionner la liste sous le trigger (fixed — indépendant de overflow parent)
+  var r = trigger.getBoundingClientRect();
+  list.style.top   = (r.bottom + window.scrollY + 6) + 'px';
+  list.style.left  = r.left + 'px';
+  list.style.width = r.width + 'px';
+  // Convertir en fixed (pas de scrollY)
+  list.style.top  = (r.bottom + 6) + 'px';
+  wrap.classList.add('open');
+}
+
+// Repositionner si scroll ou resize
+window.addEventListener('scroll', function() {
+  var wrap = document.getElementById('customSelectWrap');
+  if (!wrap || !wrap.classList.contains('open')) return;
+  var r = document.getElementById('customSelectTrigger').getBoundingClientRect();
+  var list = document.getElementById('customSelectList');
+  list.style.top  = (r.bottom + 6) + 'px';
+  list.style.left = r.left + 'px';
+}, { passive:true });
+window.addEventListener('resize', function() {
+  var wrap = document.getElementById('customSelectWrap');
+  if (wrap && wrap.classList.contains('open')) wrap.classList.remove('open');
+});
+
+function pickDomain(el, val) {
+  _selectedDomainValue = val;
+  window.selectedDomain = val;
+  // Mettre à jour le label
+  document.getElementById('customSelectLabel').textContent = val || '— Choisissez votre secteur —';
+  // Sync avec le select caché (pour compatibilité estimateur.js)
+  var sel = document.getElementById('domainSelect');
+  if (sel) { sel.value = val; }
+  // Appeler selectDomain de estimateur.js si dispo
+  if (typeof selectDomain === 'function') selectDomain(val);
+  // Marquer l'option sélectionnée
+  document.querySelectorAll('.cs-option').forEach(function(o) { o.classList.remove('selected'); });
+  el.classList.add('selected');
+  // Fermer la liste
+  document.getElementById('customSelectWrap').classList.remove('open');
+  if (window.WalaupSound) WalaupSound.click();
+}
+
+// Fermer si clic en dehors
+document.addEventListener('click', function(e) {
+  var wrap = document.getElementById('customSelectWrap');
+  if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
+
+/* ── Validation nom application ── */
+var _appName = '';
+
+function getAppName() {
+  var inp = document.getElementById('appNameInput');
+  return inp ? inp.value.trim() : '';
+}
+
+// Surcharger choosePack pour valider le nom avant de continuer
+var _origChoosePack = null;
+document.addEventListener('DOMContentLoaded', function() {
+  // Garder ref à la fonction originale
+  _origChoosePack = window.choosePack;
+  window.choosePack = function(el, name) {
+    var appName = getAppName();
+    if (!appName) {
+      var inp = document.getElementById('appNameInput');
+      if (inp) {
+        inp.classList.add('input-error');
+        inp.focus();
+        inp.scrollIntoView({ behavior:'smooth', block:'center' });
+      }
+      if (window.WalaupSound) WalaupSound.error();
+      return;
+    }
+    window.selectedAppName = appName;
+    sessionStorage.setItem('bz_app_name', appName);
+    if (_origChoosePack) _origChoosePack(el, name);
+  };
+});
+</script>
+
+</body>
+</html>

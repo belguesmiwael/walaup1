@@ -1,0 +1,41 @@
+<svg width="457" height="458" viewBox="0 0 457 458" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient brand (couche animée) -->
+    <linearGradient id="gw" x1="74" y1="167" x2="401" y2="135" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#ffd600"/>
+      <stop offset="45%"  stop-color="#ffaa00"/>
+      <stop offset="100%" stop-color="#6c8fff"/>
+    </linearGradient>
+    <linearGradient id="ga" x1="342" y1="135" x2="415" y2="59" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#ffaa00"/>
+      <stop offset="100%" stop-color="#6c8fff"/>
+    </linearGradient>
+    <!-- Animation : gris pendant 28s, transition 2s vers brand, retour gris -->
+    <style>
+      @keyframes logo-shift {
+        0%, 93.33%  { opacity: 0; }
+        96.67%      { opacity: 1; }
+        100%        { opacity: 0; }
+      }
+      .logo-brand-layer {
+        animation: logo-shift 30s ease-in-out infinite;
+      }
+    </style>
+  </defs>
+
+  <!-- COUCHE 1 : couleur originale grise (toujours visible) -->
+  <g class="logo-grey-layer">
+    <path d="M385.363 62.6589C390.112 56.998 399.282 59.1552 401.009 66.3395L414.984 124.474C416.551 130.991 410.697 136.873 404.172 135.338L351.771 123.011C345.245 121.476 342.628 113.601 346.936 108.466L385.363 62.6589Z"
+          fill="#EAE7E7" fill-opacity="0.8"/>
+    <path d="M74 167L120.89 330.182C124.772 343.692 137.13 353 151.188 353C166.866 353 180.162 341.478 182.392 325.959L202.16 188.364C203.922 176.103 214.426 167 226.813 167C239.104 167 249.558 175.968 251.428 188.116L272.656 326.021C275.046 341.543 288.402 353 304.106 353C319.303 353 332.378 342.255 335.324 327.346L367 167"
+          stroke="#EAE7E7" stroke-opacity="0.8" stroke-width="32" stroke-linecap="round"/>
+  </g>
+
+  <!-- COUCHE 2 : gradient brand (animée — opacity 0 par défaut) -->
+  <g class="logo-brand-layer">
+    <path d="M385.363 62.6589C390.112 56.998 399.282 59.1552 401.009 66.3395L414.984 124.474C416.551 130.991 410.697 136.873 404.172 135.338L351.771 123.011C345.245 121.476 342.628 113.601 346.936 108.466L385.363 62.6589Z"
+          fill="url(#ga)"/>
+    <path d="M74 167L120.89 330.182C124.772 343.692 137.13 353 151.188 353C166.866 353 180.162 341.478 182.392 325.959L202.16 188.364C203.922 176.103 214.426 167 226.813 167C239.104 167 249.558 175.968 251.428 188.116L272.656 326.021C275.046 341.543 288.402 353 304.106 353C319.303 353 332.378 342.255 335.324 327.346L367 167"
+          stroke="url(#gw)" stroke-width="32" stroke-linecap="round"/>
+  </g>
+</svg>
