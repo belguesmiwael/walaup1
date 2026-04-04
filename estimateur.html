@@ -19,20 +19,14 @@
 .wrap,
 .card,
 .results {
-  max-width: 720px;
+  max-width: 960px;
   margin-left: auto;
   margin-right: auto;
   width: 100%;
   box-sizing: border-box;
 }
 
-.card,
-.results {
-  padding-left: clamp(16px, 4vw, 32px);
-  padding-right: clamp(16px, 4vw, 32px);
-}
-
-/* Padding latéral page entière sur desktop */
+/* Padding latéral page entière */
 @media (min-width: 768px) {
   body {
     padding-left: 24px;
@@ -103,10 +97,10 @@
 .custom-select-wrap.open .cs-arrow { transform:rotate(180deg); }
 
 .custom-select-list {
-  display:none; position:fixed; z-index:9999;
-  background:#0f1623 !important; border:1.5px solid rgba(255,255,255,.13);
+  display:none; position:fixed; z-index:99999;
+  background:#0f1623 !important; border:1.5px solid rgba(255,255,255,.18);
   border-radius:12px; overflow-x:hidden; overflow-y:auto;
-  box-shadow:0 20px 60px rgba(0,0,0,.8), 0 0 0 1px rgba(0,212,255,.1);
+  box-shadow:0 20px 60px rgba(0,0,0,.85), 0 0 0 1px rgba(0,212,255,.15);
   max-height:260px;
 }
 .custom-select-wrap.open .custom-select-list { display:block; }
@@ -372,34 +366,52 @@
 /* ── Custom Select ── */
 var _selectedDomainValue = '';
 
-function toggleCustomSelect() {
-  var wrap    = document.getElementById('customSelectWrap');
-  var list    = document.getElementById('customSelectList');
+// ── Init : déplacer la liste vers body (hors de tout overflow:hidden) ──
+document.addEventListener('DOMContentLoaded', function() {
+  var list = document.getElementById('customSelectList');
+  if (list) {
+    list.style.position = 'fixed';
+    list.style.zIndex   = '99999';
+    document.body.appendChild(list); // sort du .card → plus de clipping
+  }
+});
+
+function _positionList() {
   var trigger = document.getElementById('customSelectTrigger');
-  var isOpen  = wrap.classList.contains('open');
-  if (isOpen) { wrap.classList.remove('open'); return; }
-  // Positionner la liste sous le trigger (fixed — indépendant de overflow parent)
+  var list    = document.getElementById('customSelectList');
+  if (!trigger || !list) return;
   var r = trigger.getBoundingClientRect();
-  list.style.top   = (r.bottom + window.scrollY + 6) + 'px';
+  list.style.top   = (r.bottom + 6) + 'px';
   list.style.left  = r.left + 'px';
   list.style.width = r.width + 'px';
-  // Convertir en fixed (pas de scrollY)
-  list.style.top  = (r.bottom + 6) + 'px';
-  wrap.classList.add('open');
 }
 
-// Repositionner si scroll ou resize
+function toggleCustomSelect() {
+  var wrap   = document.getElementById('customSelectWrap');
+  var list   = document.getElementById('customSelectList');
+  var isOpen = list && list.classList.contains('open');
+  if (isOpen) {
+    list.classList.remove('open');
+    list.style.display = 'none';
+    wrap && wrap.classList.remove('open');
+    return;
+  }
+  _positionList();
+  list.style.display = 'block';
+  list.classList.add('open');
+  wrap && wrap.classList.add('open');
+}
+
 window.addEventListener('scroll', function() {
-  var wrap = document.getElementById('customSelectWrap');
-  if (!wrap || !wrap.classList.contains('open')) return;
-  var r = document.getElementById('customSelectTrigger').getBoundingClientRect();
   var list = document.getElementById('customSelectList');
-  list.style.top  = (r.bottom + 6) + 'px';
-  list.style.left = r.left + 'px';
-}, { passive:true });
+  if (list && list.classList.contains('open')) _positionList();
+}, { passive: true });
+
 window.addEventListener('resize', function() {
+  var list = document.getElementById('customSelectList');
+  if (list) { list.style.display = 'none'; list.classList.remove('open'); }
   var wrap = document.getElementById('customSelectWrap');
-  if (wrap && wrap.classList.contains('open')) wrap.classList.remove('open');
+  if (wrap) wrap.classList.remove('open');
 });
 
 function pickDomain(el, val) {
@@ -422,8 +434,15 @@ function pickDomain(el, val) {
 
 // Fermer si clic en dehors
 document.addEventListener('click', function(e) {
-  var wrap = document.getElementById('customSelectWrap');
-  if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+  var wrap    = document.getElementById('customSelectWrap');
+  var list    = document.getElementById('customSelectList');
+  var trigger = document.getElementById('customSelectTrigger');
+  if (!trigger || trigger.contains(e.target)) return;
+  if (list && !list.contains(e.target)) {
+    list.style.display = 'none';
+    list.classList.remove('open');
+    if (wrap) wrap.classList.remove('open');
+  }
 });
 
 /* ── Validation nom application ── */
