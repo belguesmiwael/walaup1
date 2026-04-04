@@ -181,28 +181,6 @@ async function forceApproveDemoAdmin(msgId){
   }catch(e){toast('Erreur','err');}
 }
 
-async function requestPayment(){
-  if(!curLeadId)return;
-  try{
-    await db.collection('leads').doc(curLeadId).update({status:'payment_confirmed',updatedAt:FS.serverTimestamp(),lastMsgAt:FS.serverTimestamp()});
-    await db.collection('messages').add({
-      leadId:curLeadId,from:'system',type:'system',
-      text:'\u2705 Paiement confirm\u00e9 par l\'admin',
-      createdAt:FS.serverTimestamp(),readByClient:false,readByAdmin:true
-    });
-    // Notify client
-    const lead=allLeads.find(l=>l.id===curLeadId);
-    if(lead?.userId){
-      await db.collection('notifications').add({
-        userId:lead.userId,leadId:curLeadId,
-        title:'✅ Paiement confirmé !',
-        message:'Votre paiement a été confirmé. Votre version finale est en préparation.',
-        type:'payment_ok',read:false,createdAt:FS.serverTimestamp()
-      });
-    }
-    toast('✅ Paiement confirmé — prêt à envoyer la version finale');
-  }catch(e){toast('Erreur','err');}
-}
 
 if(sessionStorage.getItem('bzAdmin')==='1'){showAdmin();_reqPushPerm();setTimeout(function(){
 /* ── REAL-TIME NOTIFICATIONS (admin) ── */
@@ -1245,125 +1223,109 @@ function filterPay(f,btn){
   btn.classList.add('on');
   renderPayments();
 }
+
+/* Confirm payment directly from payments tab */
+
+
+
+/* ══ PAYMENTS — PATCHED FUNCTIONS ══ */
 function renderPayments(){
-  // Include ALL leads with payment-relevant statuses
   const PAY_STATUSES=['validated','payment_requested','payment_confirmed','converted','closed'];
   const allPayLeads=allLeads.filter(l=>PAY_STATUSES.includes(l.status)||l.payMethod);
-
-  const payLeads=payFilter==='all'
-    ?allPayLeads
-    :allPayLeads.filter(l=>l.status===payFilter);
-
-  // ── Stats ──
+  const payLeads=payFilter==='all'?allPayLeads:allPayLeads.filter(l=>l.status===payFilter);
   const confirmed=allPayLeads.filter(l=>['payment_confirmed','converted','closed'].includes(l.status));
   const pending=allPayLeads.filter(l=>['validated','payment_requested'].includes(l.status));
   const now=new Date(),month=now.getMonth(),year=now.getFullYear();
   const monthConf=confirmed.filter(l=>{const d=l.payConfirmedAt?.toDate?.();return d&&d.getMonth()===month&&d.getFullYear()===year;});
-
+  function getAmount(l){
+    if(l.payAmount&&l.payAmount>0)return l.payAmount;
+    const base=(tarifs.packs[l.pack]||{fixed:0}).fixed||0;
+    const rem=(tarifs.packs[l.pack]||{remise:0}).remise||0;
+    return Math.round(base*(1-rem/100));
+  }
+  const totalDT=confirmed.reduce((s,l)=>s+getAmount(l),0);
+  const monthDT=monthConf.reduce((s,l)=>s+getAmount(l),0);
   const el_total=document.getElementById('payTotal');
   const el_pend=document.getElementById('payPending');
   const el_conf=document.getElementById('payConfirmed');
   const el_month=document.getElementById('payMonth');
-
+  if(el_total)el_total.textContent=(totalDT||'0')+' DT';
   if(el_pend)el_pend.textContent=pending.length;
   if(el_conf)el_conf.textContent=confirmed.length;
-  if(el_month)el_month.textContent=monthConf.length+' ce mois';
-
-  // Calculate total from pack prices
-  const totalEst=confirmed.reduce((s,l)=>{
-    const price=(tarifs.packs[l.pack]||{fixed:0}).fixed||0;
-    const remise=(tarifs.packs[l.pack]||{remise:0}).remise||0;
-    return s+Math.round(price*(1-remise/100));
-  },0);
-  if(el_total)el_total.textContent=(totalEst||'—')+' DT';
-
-  // ── Table ──
+  if(el_month)el_month.textContent=(monthDT||'0')+' DT';
   const tbody=document.getElementById('payTable');
   if(!tbody)return;
-  if(!payLeads.length){
-    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--mu);font-size:.82rem">Aucune transaction à afficher</td></tr>';
-    return;
-  }
-
-  const PC={
-    essentiel:{color:'var(--green)',label:'🟢 Essentiel'},
-    pro:{color:'var(--ac)',label:'🔵 Pro'},
-    partenaire:{color:'var(--red)',label:'🔴 Partenaire'}
-  };
-
-  const STATUS_MAP={
-    validated:       {cls:'ps-pending', label:'✅ Démo validée',    desc:'En attente de paiement client'},
-    payment_requested:{cls:'ps-pending', label:'💳 Paiement requis', desc:'Client invité à payer'},
-    payment_confirmed:{cls:'ps-confirmed',label:'✅ Paiement reçu',  desc:'Paiement confirmé'},
-    converted:       {cls:'ps-confirmed',label:'✅ Livré',           desc:'App livrée'},
-    closed:          {cls:'ps-confirmed',label:'✅ Terminé',         desc:'Terminé'}
-  };
-
+  if(!payLeads.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--mu);font-size:.82rem">Aucune transaction à afficher</td></tr>';return;}
+  const PC={essentiel:{color:'var(--green)',label:'🟢 Essentiel'},pro:{color:'var(--ac)',label:'🔵 Pro'},partenaire:{color:'var(--red)',label:'🔴 Partenaire'}};
+  const STATUS_MAP={validated:{cls:'ps-pending',label:'✅ Démo validée',desc:'En attente de paiement client'},payment_requested:{cls:'ps-pending',label:'💳 Paiement requis',desc:'Client invité à payer'},payment_confirmed:{cls:'ps-confirmed',label:'✅ Paiement reçu',desc:'Paiement confirmé'},converted:{cls:'ps-confirmed',label:'✅ Livré',desc:'App livrée'},closed:{cls:'ps-confirmed',label:'✅ Terminé',desc:'Terminé'}};
   tbody.innerHTML=payLeads.map(l=>{
     const st=STATUS_MAP[l.status]||{cls:'ps-pending',label:l.status,desc:''};
     const packInfo=PC[l.pack]||{color:'var(--mu)',label:'—'};
-    const price=(() => {
-      const base=(tarifs.packs[l.pack]||{fixed:0}).fixed||0;
-      const rem=(tarifs.packs[l.pack]||{remise:0}).remise||0;
-      return base>0?Math.round(base*(1-rem/100))+' DT':'—';
-    })();
+    const price=getAmount(l);
+    const priceStr=price>0?price+' DT':'—';
     const isActionable=['validated','payment_requested'].includes(l.status);
-    const actionBtns=isActionable?`
-      <button onclick="confirmPaymentAdmin('${l.id}')"
-        style="padding:4px 9px;border-radius:6px;border:none;background:var(--green);color:#000;font-size:.67rem;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">
-        ✅ Confirmer
-      </button>`:
-      `<button onclick="selectLead('${l.id}');showTab('clients',document.querySelectorAll('.nav-tab')[1])"
-        style="padding:4px 9px;border-radius:6px;border:1px solid var(--bd2);background:none;color:var(--mu);font-size:.67rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">
-        Voir →
-      </button>`;
-    return `<tr>
-      <td>
-        <div style="font-weight:700;font-size:.82rem">${l.name||'—'}</div>
-        <div style="font-size:.67rem;color:var(--mu);margin-top:1px">${l.userEmail||l.userPhone||l.phone||'—'}</div>
-      </td>
-      <td><span style="font-size:.71rem;color:${packInfo.color};font-weight:700">${packInfo.label}</span></td>
-      <td style="font-weight:700;font-size:.8rem">${price}</td>
-      <td>
-        <span class="pay-method-badge">${l.payMethod||'—'}</span>
-      </td>
-      <td>
-        <span class="pay-status ${st.cls}">${st.label}</span>
-        <div style="font-size:.63rem;color:var(--mu);margin-top:2px">${st.desc}</div>
-      </td>
-      <td style="font-size:.71rem;color:var(--mu)">${fmtD(l.payConfirmedAt||l.clientApprovedAt||l.createdAt)}</td>
-      <td>${actionBtns}</td>
-    </tr>`;
+    const actionBtns=isActionable
+      ?`<button onclick="openPayMethodModal('${l.id}')" style="padding:5px 10px;border-radius:7px;border:none;background:var(--green);color:#000;font-size:.67rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">✅ Confirmer</button>`
+      :`<button onclick="selectLead('${l.id}');sbNav('clients')" style="padding:5px 10px;border-radius:7px;border:1px solid var(--bd2);background:none;color:var(--mu);font-size:.67rem;cursor:pointer;font-family:'Outfit',sans-serif">Voir →</button>`;
+    return `<tr><td><div style="font-weight:700;font-size:.82rem">${l.name||'—'}</div><div style="font-size:.67rem;color:var(--mu);margin-top:1px">${l.userEmail||l.userPhone||l.phone||'—'}</div></td><td><span style="font-size:.71rem;color:${packInfo.color};font-weight:700">${packInfo.label}</span></td><td style="font-weight:700;font-size:.8rem">${priceStr}</td><td><span class="pay-method-badge">${l.payMethod||'—'}</span></td><td><span class="pay-status ${st.cls}">${st.label}</span><div style="font-size:.63rem;color:var(--mu);margin-top:2px">${st.desc}</div></td><td style="font-size:.71rem;color:var(--mu)">${fmtD(l.payConfirmedAt||l.clientApprovedAt||l.createdAt)}</td><td>${actionBtns}</td></tr>`;
   }).join('');
 }
 
-/* Confirm payment directly from payments tab */
-async function confirmPaymentAdmin(leadId){
-  if(!window.confirm('Confirmer la réception du paiement pour ce client ?'))return;
-  try{
-    await db.collection('leads').doc(leadId).update({
-      status:'payment_confirmed',
-      payConfirmedAt:FS.serverTimestamp(),
-      updatedAt:FS.serverTimestamp()
-    });
-    const lead=allLeads.find(l=>l.id===leadId);
-    if(lead?.userId){
-      await db.collection('notifications').add({
-        userId:lead.userId,leadId,
-        title:'✅ Paiement confirmé !',
-        message:'Votre paiement a été reçu. Votre application finale est en préparation.',
-        type:'payment_ok',read:false,createdAt:FS.serverTimestamp()
-      });
-      await db.collection('messages').add({
-        leadId,from:'system',type:'system',
-        text:'✅ Paiement confirmé ! Votre application finale est en cours de préparation.',
-        createdAt:FS.serverTimestamp(),readByClient:false,readByAdmin:true
-      });
-    }
-    toast('✅ Paiement confirmé — prêt à envoyer la version finale');
-  }catch(e){toast('Erreur: '+e.message,'err');}
+async function requestPayment(){if(!curLeadId)return;openPayMethodModal(curLeadId);}
+
+async function confirmPaymentAdmin(leadId){openPayMethodModal(leadId||curLeadId);}
+
+function openPayMethodModal(leadId){
+  const lead=allLeads.find(l=>l.id===leadId);if(!lead)return;
+  const base=(tarifs.packs[lead.pack]||{fixed:0}).fixed||0;
+  const rem=(tarifs.packs[lead.pack]||{remise:0}).remise||0;
+  const amount=lead.payAmount||(Math.round(base*(1-rem/100)));
+  const sub=document.getElementById('payModalSub');
+  const amountEl=document.getElementById('payModalAmount');
+  const leadIdEl=document.getElementById('payModalLeadId');
+  const methodEl=document.getElementById('payModalMethod');
+  const confirmBtn=document.getElementById('payModalConfirmBtn');
+  if(sub)sub.textContent=(lead.name||'—')+' · Pack '+(lead.packLabel||lead.pack||'—');
+  if(amountEl)amountEl.textContent=(amount||'—')+' DT';
+  if(leadIdEl)leadIdEl.value=leadId;
+  if(methodEl)methodEl.value='';
+  if(confirmBtn){confirmBtn.disabled=true;confirmBtn.style.opacity='.5';}
+  document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.remove('selected'));
+  const modal=document.getElementById('payMethodModal');
+  if(modal)modal.style.display='flex';
 }
 
+function closePayMethodModal(){const modal=document.getElementById('payMethodModal');if(modal)modal.style.display='none';}
+
+function selectPayMethod(btn){
+  document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const methodEl=document.getElementById('payModalMethod');
+  if(methodEl)methodEl.value=btn.getAttribute('data-method')||'';
+  const confirmBtn=document.getElementById('payModalConfirmBtn');
+  if(confirmBtn){confirmBtn.disabled=false;confirmBtn.style.opacity='1';}
+  if(window.WalaupSound)WalaupSound.click();
+}
+
+async function executePaymentConfirm(){
+  const leadId=document.getElementById('payModalLeadId')?.value;
+  const method=document.getElementById('payModalMethod')?.value;
+  if(!leadId||!method)return;
+  closePayMethodModal();
+  const lead=allLeads.find(l=>l.id===leadId);
+  const base=(tarifs.packs[lead?.pack]||{fixed:0}).fixed||0;
+  const rem=(tarifs.packs[lead?.pack]||{remise:0}).remise||0;
+  const amount=Math.round(base*(1-rem/100));
+  try{
+    await db.collection('leads').doc(leadId).update({status:'payment_confirmed',payConfirmedAt:FS.serverTimestamp(),payMethod:method,payAmount:amount,updatedAt:FS.serverTimestamp()});
+    if(lead?.userId){
+      await db.collection('notifications').add({userId:lead.userId,leadId,title:'✅ Paiement confirmé !',message:'Votre paiement de '+amount+' DT ('+method+') a été reçu.',type:'payment_ok',read:false,createdAt:FS.serverTimestamp()});
+      await db.collection('messages').add({leadId,from:'system',type:'system',text:'✅ Paiement confirmé ('+method+' — '+amount+' DT). Votre application finale est en cours de préparation.',createdAt:FS.serverTimestamp(),readByClient:false,readByAdmin:true});
+    }
+    if(window.WalaupSound)WalaupSound.success();
+    toast('✅ Paiement '+amount+' DT confirmé via '+method);
+  }catch(e){toast('Erreur: '+e.message,'err');}
+}
 
 
 /* ══ SIDEBAR NAVIGATION ══ */
