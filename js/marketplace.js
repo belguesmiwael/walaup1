@@ -98,37 +98,27 @@ function renderGrid() {
     return;
   }
 
+  // Build HTML with data-id (no onclick strings — avoids all escaping issues)
   grid.innerHTML = filtered.map(function(a) {
-    var hasImg = a.thumbnailUrl && a.thumbnailUrl.trim();
-    var thumbHtml = hasImg
-      // Real image
-      ? '<div class="ac-thumb-wrap">' +
-          '<img class="ac-thumb" src="' + _esc(a.thumbnailUrl) + '" ' +
-            'onerror="this.parentNode.innerHTML=\'<div class=\\"ac-thumb-fallback\\">' + (a.icon||'📱') + '</div>\'"' +
-            ' alt="' + _esc(a.name||'') + '" loading="lazy">' +
-          '<div class="ac-thumb-gradient"></div>' +
-          (a.partner && a.partner !== 'à venir' ? '<div class="partner-badge">✓ Partenaire</div>' : '') +
-        '</div>'
-      // Emoji fallback
-      : '<div class="ac-thumb-wrap">' +
-          '<div class="ac-thumb-fallback">' + (a.icon||'📱') + '</div>' +
-          (a.partner && a.partner !== 'à venir' ? '<div class="partner-badge">✓ Partenaire</div>' : '') +
-        '</div>';
-
     var tagsHtml = (a.tags||[]).map(function(t) {
       return '<span class="ac-tag">' + _esc(t) + '</span>';
     }).join('');
-
     var origHtml = a.origPrice ? '<span class="ac-orig">' + _esc(a.origPrice) + '</span>' : '';
+    var badge = (a.partner && a.partner !== 'à venir') ? '<div class="partner-badge">✓ Partenaire</div>' : '';
+    var partnerLine = (a.partner && a.partner !== 'à venir') ? '<div class="ac-partner">Par ' + _esc(a.partner) + '</div>' : '';
 
-    return '<div class="app-card" onclick="tryApp(\'' + a.id + '\')">' +
-      thumbHtml +
+    return '<div class="app-card" data-app-id="' + _esc(a.id) + '">' +
+      '<div class="ac-thumb-wrap">' +
+        '<div class="ac-thumb-fallback" id="ac-fb-' + _esc(a.id) + '">' + (a.icon||'📱') + '</div>' +
+        '<div class="ac-thumb-gradient"></div>' +
+        badge +
+      '</div>' +
       '<div class="ac-body">' +
         '<div class="ac-header">' +
           '<div class="ac-icon-sm">' + (a.icon||'📱') + '</div>' +
           '<div style="flex:1;min-width:0">' +
             '<div class="ac-name">' + _esc(a.name||'Application') + '</div>' +
-            (a.partner && a.partner !== 'à venir' ? '<div class="ac-partner">Par ' + _esc(a.partner) + '</div>' : '') +
+            partnerLine +
           '</div>' +
         '</div>' +
         '<div class="ac-desc">' + _esc(a.description||'') + '</div>' +
@@ -136,15 +126,46 @@ function renderGrid() {
         '<div class="ac-footer">' +
           '<div class="ac-price">' + origHtml + _esc(a.price||'Sur devis') + '</div>' +
           '<div class="ac-btns">' +
-            '<button class="btn-try" onclick="event.stopPropagation();tryApp(\'' + a.id + '\')">' +
-              '<i class="ph-bold ph-eye"></i> Essayer</button>' +
-            '<button class="btn-buy" onclick="event.stopPropagation();openConfirmModal(_allApps.find(function(x){return x.id===\'' + a.id + '\';}))">' +
-              '<i class="ph-bold ph-shopping-cart-simple"></i> Acheter</button>' +
+            '<button class="btn-try" data-try-id="' + _esc(a.id) + '"><i class="ph-bold ph-eye"></i> Essayer</button>' +
+            '<button class="btn-buy" data-buy-id="' + _esc(a.id) + '"><i class="ph-bold ph-shopping-cart-simple"></i> Acheter</button>' +
           '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
   }).join('');
+
+  // Set images via JS — no src in HTML, no onerror attribute, no escaping issues
+  filtered.forEach(function(a) {
+    if (!a.thumbnailUrl || !a.thumbnailUrl.trim()) return;
+    var wrap = grid.querySelector('[data-app-id="' + a.id + '"] .ac-thumb-wrap');
+    var fb   = document.getElementById('ac-fb-' + a.id);
+    if (!wrap) return;
+    var img = document.createElement('img');
+    img.className = 'ac-thumb';
+    img.alt       = a.name || '';
+    img.loading   = 'lazy';
+    img.src       = a.thumbnailUrl; // direct assignment — no HTML encoding
+    img.onerror   = function() { img.style.display = 'none'; };
+    img.onload    = function() { if (fb) fb.style.display = 'none'; };
+    wrap.insertBefore(img, wrap.firstChild);
+  });
+
+  // Bind events via addEventListener — no onclick strings in HTML
+  grid.querySelectorAll('[data-app-id]').forEach(function(card) {
+    var id = card.getAttribute('data-app-id');
+    card.addEventListener('click', function() { tryApp(id); });
+  });
+  grid.querySelectorAll('[data-try-id]').forEach(function(btn) {
+    var id = btn.getAttribute('data-try-id');
+    btn.addEventListener('click', function(e) { e.stopPropagation(); tryApp(id); });
+  });
+  grid.querySelectorAll('[data-buy-id]').forEach(function(btn) {
+    var id = btn.getAttribute('data-buy-id');
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openConfirmModal(_allApps.find(function(x) { return x.id === id; }));
+    });
+  });
 }
 
 function _esc(s) {
@@ -162,21 +183,30 @@ function tryApp(id) {
   _curAppData = a;
   _trialValidated = false;
 
-  // Populate top bar
-  var dovIcon = document.getElementById('dovIcon');
+  // Populate top bar — safe helper, no innerHTML injection
+  function _sid(id) { return document.getElementById(id); }
+  function _setText(id, val) { var e = _sid(id); if (e) e.textContent = val; }
+
+  // Icon: img set via JS, no onerror attribute
+  var dovIcon = _sid('dovIcon');
   if (dovIcon) {
-    // Show thumbnail in icon if available, else emoji
+    dovIcon.innerHTML = '';
     if (a.thumbnailUrl && a.thumbnailUrl.trim()) {
-      dovIcon.innerHTML = '<img src="' + a.thumbnailUrl + '" alt="" onerror="this.parentNode.textContent=\'' + (a.icon||'📱') + '\'">';
+      var iconImg = document.createElement('img');
+      iconImg.src = a.thumbnailUrl;
+      iconImg.alt = '';
+      iconImg.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:8px';
+      iconImg.onerror = function() { dovIcon.textContent = a.icon || '📱'; };
+      dovIcon.appendChild(iconImg);
     } else {
       dovIcon.textContent = a.icon || '📱';
     }
   }
-  var el;
-  el = document.getElementById('dovTitle');   if (el) el.textContent = a.name || 'Application';
-  el = document.getElementById('dovPartner'); if (el) el.textContent = (a.partner && a.partner !== 'à venir') ? 'Par ' + a.partner : '';
-  el = document.getElementById('dovPrice');   if (el) el.textContent = a.price || '';
-  el = document.getElementById('dovUrlBar');  if (el) el.textContent = (a.demoUrl || 'walaup.app/demo').replace(/^https?:\/\//, '');
+
+  _setText('dovTitle',   a.name || 'Application');
+  _setText('dovPartner', (a.partner && a.partner !== 'à venir') ? 'Par ' + a.partner : '');
+  _setText('dovPrice',   a.price || '');
+  _setText('dovUrlBar',  (a.demoUrl || a.src || 'walaup.app/demo').replace(/^https?:\/\//, ''));
 
   // Reset trial badge + button
   var badge = document.getElementById('trialBadge');
