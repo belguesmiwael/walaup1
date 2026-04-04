@@ -153,7 +153,7 @@ function renderGrid() {
   // Bind events via addEventListener — no onclick strings in HTML
   grid.querySelectorAll('[data-app-id]').forEach(function(card) {
     var id = card.getAttribute('data-app-id');
-    card.addEventListener('click', function() { tryApp(id); });
+    card.addEventListener('click', function() { openInfoPanel(id); });
   });
   grid.querySelectorAll('[data-try-id]').forEach(function(btn) {
     var id = btn.getAttribute('data-try-id');
@@ -171,6 +171,139 @@ function renderGrid() {
 function _esc(s) {
   if (!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+
+/* ══════════════════════════════════════════
+   INFO PANEL
+   ════════════════════════════════════════ */
+function openInfoPanel(id) {
+  var a = _allApps.find(function(x) { return x.id === id; });
+  if (!a) return;
+  _curAppData = a;
+  if (window.WalaupSound) WalaupSound.click();
+
+  // ── Icon ──
+  var ipIcon = document.getElementById('ipIcon');
+  if (ipIcon) {
+    ipIcon.innerHTML = '';
+    if (a.thumbnailUrl && a.thumbnailUrl.trim()) {
+      var img = document.createElement('img');
+      img.src = a.thumbnailUrl;
+      img.onerror = function() { ipIcon.textContent = a.icon || '📱'; };
+      ipIcon.appendChild(img);
+    } else {
+      ipIcon.textContent = a.icon || '📱';
+    }
+  }
+
+  // ── Thumbnail banner ──
+  var ipThumbWrap = document.getElementById('ipThumbWrap');
+  var ipThumb = document.getElementById('ipThumb');
+  if (ipThumbWrap && ipThumb) {
+    if (a.thumbnailUrl && a.thumbnailUrl.trim()) {
+      ipThumb.src = a.thumbnailUrl;
+      ipThumb.onerror = function() { ipThumbWrap.style.display = 'none'; };
+      ipThumbWrap.style.display = 'block';
+    } else {
+      ipThumbWrap.style.display = 'none';
+    }
+  }
+
+  // ── Basic info ──
+  _ipSet('ipName',    a.name || 'Application');
+  _ipSet('ipPartner', (a.partner && a.partner !== 'à venir') ? 'Par ' + a.partner : '');
+  _ipSet('ipPrice',   (a.origPrice ? a.origPrice + ' → ' : '') + (a.price || 'Sur devis'));
+
+  // ── Tagline ──
+  var ipTagline = document.getElementById('ipTagline');
+  if (ipTagline) {
+    ipTagline.textContent = a.tagline || a.description || '';
+    ipTagline.style.display = (a.tagline || a.description) ? 'block' : 'none';
+  }
+
+  // ── For who ──
+  var ipForWho = document.getElementById('ipForWho');
+  var ipForWhoTxt = document.getElementById('ipForWhoTxt');
+  if (ipForWho && ipForWhoTxt) {
+    ipForWhoTxt.textContent = a.forWho || '';
+    ipForWho.style.display = a.forWho ? 'flex' : 'none';
+  }
+
+  // ── Problems ──
+  var problems = a.problems || [];
+  var ipProb = document.getElementById('ipProblemsSection');
+  var ipProbList = document.getElementById('ipProblemsList');
+  if (ipProb && ipProbList) {
+    if (problems.length) {
+      ipProbList.innerHTML = problems.map(function(p) {
+        return '<li>' + _esc(p) + '</li>';
+      }).join('');
+      ipProb.style.display = 'block';
+    } else {
+      ipProb.style.display = 'none';
+    }
+  }
+
+  // ── Features ──
+  var features = a.features || [];
+  var ipFeat = document.getElementById('ipFeaturesSection');
+  var ipFeatList = document.getElementById('ipFeaturesList');
+  if (ipFeat && ipFeatList) {
+    if (features.length) {
+      ipFeatList.innerHTML = features.map(function(f) {
+        var title = typeof f === 'object' ? (f.title || '') : f;
+        var desc  = typeof f === 'object' ? (f.desc  || '') : '';
+        return '<div class="ip-feature-card">' +
+          '<div class="ip-feat-title">' + _esc(title) + '</div>' +
+          (desc ? '<div class="ip-feat-desc">' + _esc(desc) + '</div>' : '') +
+        '</div>';
+      }).join('');
+      ipFeat.style.display = 'block';
+    } else {
+      ipFeat.style.display = 'none';
+    }
+  }
+
+  // ── Tags ──
+  var tags = a.tags || [];
+  var ipTagsRow = document.getElementById('ipTagsRow');
+  var ipTagsList = document.getElementById('ipTagsList');
+  if (ipTagsRow && ipTagsList) {
+    if (tags.length) {
+      ipTagsList.innerHTML = tags.map(function(t) {
+        return '<span class="ac-tag">' + _esc(t) + '</span>';
+      }).join('');
+      ipTagsRow.style.display = 'flex';
+    } else {
+      ipTagsRow.style.display = 'none';
+    }
+  }
+
+  // ── Open ──
+  var panel = document.getElementById('infoPanel');
+  if (panel) { panel.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+
+function closeInfoPanel() {
+  var panel = document.getElementById('infoPanel');
+  if (panel) panel.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function onInfoTry() {
+  closeInfoPanel();
+  setTimeout(function() { tryApp(_curAppData && _curAppData.id); }, 180);
+}
+
+function onInfoBuy() {
+  closeInfoPanel();
+  setTimeout(function() { openConfirmModal(_curAppData); }, 180);
+}
+
+function _ipSet(id, val) {
+  var e = document.getElementById(id);
+  if (e) e.textContent = val;
 }
 
 /* ══════════════════════════════════════════
@@ -349,7 +482,7 @@ function toast(msg, type) {
 
 /* ── Keyboard + swipe ── */
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') { closeDemoOv(); closeConfirmModal(); }
+  if (e.key === 'Escape') { closeDemoOv(); closeConfirmModal(); closeInfoPanel(); }
 });
 
 var _touchY0 = 0;

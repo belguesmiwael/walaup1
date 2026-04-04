@@ -52,49 +52,22 @@
   };
 
   // Visual notification banner (for new messages via Firestore)
-  window.showNotifBanner = function(title, body, leadId){
+  window.showNotifBanner = function(title, body){
+    // Sound
     if(window.WalaupSound) WalaupSound.notif();
+    // Visual badge
     var nb = document.getElementById('notifBadge');
     if(nb){
       var nt = nb.querySelector('.notif-text');
-      if(nt) nt.innerHTML =
-        '<span class="notif-client">' + (title||'Nouveau message') + '</span>' +
-        '<span class="notif-preview">' + (body||'') + '</span>' +
-        '<span style="font-size:.65rem;color:var(--ac);margin-top:3px;display:block">Cliquer pour ouvrir →</span>';
+      if(nt) nt.innerHTML = '<strong>' + (title||'Nouveau message') + '</strong><br>' + (body||'');
       nb.classList.add('show');
-      // Stocker le leadId pour navigation au clic
-      nb._notifLeadId = leadId || null;
-      clearTimeout(nb._notifTimer);
-      nb._notifTimer = setTimeout(function(){ nb.classList.remove('show'); }, 6000);
+      setTimeout(function(){ nb.classList.remove('show'); }, 5000);
     }
+    // Browser notification (if permission granted)
     if(Notification && Notification.permission === 'granted'){
       try{ new Notification(title||'Walaup', {body: body||'', icon: '/favicon.ico'}); }catch(e){}
     }
   };
-
-  // Clic sur la bannière → ouvrir la conversation du client
-  document.addEventListener('DOMContentLoaded', function(){
-    var nb = document.getElementById('notifBadge');
-    if(!nb) return;
-    nb.style.cursor = 'pointer';
-    nb.addEventListener('click', function(e){
-      // Ignorer clic sur le bouton fermer
-      if(e.target.closest('button')) return;
-      var leadId = nb._notifLeadId;
-      nb.classList.remove('show');
-      if(!leadId) return;
-      // Naviguer vers Clients + ouvrir la conversation
-      sbNav('clients');
-      setTimeout(function(){
-        selectLead(leadId);
-        // Aller directement à la messagerie
-        setTimeout(function(){
-          var msgBtn = document.getElementById('cdNavMsg');
-          if(msgBtn) showCdSection('messagerie', msgBtn);
-        }, 300);
-      }, 150);
-    });
-  });
 
   // Request notification permission
   window.requestNotifPermission = function(){
@@ -178,23 +151,10 @@ function showAdmin(){
   }
   document.getElementById('loginView').style.display='none';
   document.getElementById('adminView').style.display='flex';
-  // === FIX: afficher la sidebar seulement après login ===
-  var sb=document.getElementById('adminSidebar');
-  if(sb)sb.classList.add('visible');
   loadLeads();loadTestis();loadTarifs();
   showTab('dash',document.querySelector('.nav-tab'));
-  setTimeout(setupAdminTypingDetection, 500);
 }
-function logout(){
-  sessionStorage.removeItem('bzAdmin');
-  document.getElementById('adminView').style.display='none';
-  document.getElementById('loginView').style.display='flex';
-  // === FIX: cacher la sidebar au logout ===
-  var sb=document.getElementById('adminSidebar');
-  if(sb)sb.classList.remove('visible','open');
-  var ov=document.getElementById('sbOverlay');
-  if(ov)ov.classList.remove('on');
-}
+function logout(){sessionStorage.removeItem('bzAdmin');document.getElementById('adminView').style.display='none';document.getElementById('loginView').style.display='flex';}
 
 /* ══ ADMIN DEMO MANAGEMENT ══ */
 async function resetDemoApproval(msgId){
@@ -275,7 +235,6 @@ function loadLeads(){
   },e=>console.error(e));
 
   // Global listener: unread client messages across all leads
-  var _msgListenerReady=false; // évite notif au 1er chargement
   db.collection('messages')
     .where('from','==','client')
     .where('readByAdmin','==',false)
@@ -290,43 +249,18 @@ function loadLeads(){
         if(!prev||msgTime>prev.time){
           _leadLastMsgMap[m.leadId]={text:m.text||'📎',time:msgTime,from:'client'};
         }
-        db.collection('leads').doc(m.leadId).update({lastMsgAt:m.createdAt}).catch(()=>{});
+        // Bubble lastMsgAt to lead doc for sorting
+        db.collection('leads').doc(m.leadId)
+          .update({lastMsgAt:m.createdAt})
+          .catch(()=>{});
       });
-
-      // === FIX: Notifications enrichies — nom client + demande ===
-      if(_msgListenerReady){
-        snap.docChanges().forEach(function(change){
-          if(change.type!=='added')return;
-          var m=change.doc.data();
-          if(!m.leadId||m.from!=='client')return;
-          // Ne pas notifier si la conversation est déjà ouverte ET lue
-          if(m.leadId===curLeadId)return;
-          var lead=allLeads.find(function(l){return l.id===m.leadId;});
-          var clientName=lead?lead.name||lead.phone||'Client inconnu':'Client';
-          var demande=lead?lead.type||'Application':'Application';
-          var preview=(m.text||'📎').substring(0,55)+(m.text&&m.text.length>55?'…':'');
-          // Notif banner enrichie
-          if(window.showNotifBanner){
-            window.showNotifBanner(
-              '💬 '+clientName,
-              demande+' — '+preview,
-              m.leadId        // ← passer leadId pour navigation au clic
-            );
-          }
-          if(window.WalaupSound)WalaupSound.notif();
-          // Push navigateur si en arrière-plan
-          _maybePush2(clientName, demande, preview);
-        });
-      }
-      setTimeout(function(){_msgListenerReady=true;},1500);
-
       renderLeads();
-      // Sidebar badge — messages non lus uniquement
+      // Sidebar badge
       var total=Object.values(_leadUnreadMap).reduce(function(a,b){return a+b;},0);
       var badge=document.getElementById('sbBadgeClients');
       if(badge){badge.textContent=total>9?'9+':total||'';badge.className='sb-badge'+(total?' on':'');}
-      updateSidebarBadges();
-      if(total>0&&!_msgListenerReady)_maybePush(total);
+      // Phone push (background only)
+      if(total>0) _maybePush(total);
     },()=>{});
 }
 
@@ -343,20 +277,6 @@ function _maybePush(n){
     }
   }catch(e){}
 }
-
-// === Push enrichi avec nom client ===
-function _maybePush2(clientName,demande,preview){
-  if(!('Notification' in window)||Notification.permission!=='granted')return;
-  try{
-    var title='💬 '+clientName+' — '+demande;
-    if(window._swReg){
-      window._swReg.showNotification(title,{body:preview,tag:'walaup-msg-'+Date.now(),renotify:true,vibrate:[200,100,200]});
-    } else if(document.visibilityState!=='visible'){
-      new Notification(title,{body:preview});
-    }
-  }catch(e){}
-}
-
 
 
 
@@ -579,9 +499,6 @@ function renderAdminChat(msgs,leadId){
 async function sendAdminMsg(){
   if(window.WalaupSound) WalaupSound.send();
   if(!curLeadId)return;
-  // Clear typing indicator on send
-  clearTimeout(window._adminTypingTimer);
-  db.collection('leads').doc(curLeadId).update({adminTyping:false}).catch(()=>{});
   const lead=allLeads.find(l=>l.id===curLeadId);
   const text=document.getElementById('adminMsgIn').value.trim();if(!text)return;
   document.getElementById('adminMsgIn').value='';document.getElementById('adminMsgIn').style.height='auto';
@@ -809,13 +726,6 @@ function selectLeadInGroup(id, autoFirst=false){
 async function selectLead(id, group=null){
   curLeadId=id;
   _ppOpen=false;
-  // === Fermer la bannière de notif si elle concerne ce lead ===
-  var nb=document.getElementById('notifBadge');
-  if(nb&&nb._notifLeadId===id){
-    nb.classList.remove('show');
-    nb._notifLeadId=null;
-    clearTimeout(nb._notifTimer);
-  }
 
   // Reconstruire le groupe si non fourni
   const lead=allLeads.find(l=>l.id===id);
@@ -917,14 +827,6 @@ async function selectLead(id, group=null){
 
   // Chat de CETTE demande uniquement
   loadAdminChat(id,lead.userId);
-
-  // === FIX: Typing indicator — écouter clientTyping sur le lead ===
-  if(window._unsubTyping)window._unsubTyping();
-  window._unsubTyping=db.collection('leads').doc(id).onSnapshot(function(snap){
-    var data=snap.data()||{};
-    var ind=document.getElementById('adminTypingIndicator');
-    if(ind)ind.classList.toggle('visible',!!data.clientTyping);
-  });
 
   // Chat overlay title
   const title=document.getElementById('chatOvTitle');
@@ -1426,25 +1328,6 @@ async function executePaymentConfirm(){
 }
 
 
-/* ══ TYPING DETECTION — Admin ══ */
-function setupAdminTypingDetection(){
-  var ta=document.getElementById('adminMsgIn');
-  if(!ta||ta._typingBound)return;
-  ta._typingBound=true;
-  ta.addEventListener('input',function(){
-    if(!curLeadId)return;
-    db.collection('leads').doc(curLeadId).update({adminTyping:true}).catch(()=>{});
-    clearTimeout(window._adminTypingTimer);
-    window._adminTypingTimer=setTimeout(function(){
-      if(curLeadId)db.collection('leads').doc(curLeadId).update({adminTyping:false}).catch(()=>{});
-    },2000);
-  });
-  ta.addEventListener('blur',function(){
-    clearTimeout(window._adminTypingTimer);
-    if(curLeadId)db.collection('leads').doc(curLeadId).update({adminTyping:false}).catch(()=>{});
-  });
-}
-
 /* ══ SIDEBAR NAVIGATION ══ */
 function toggleSidebar(){
   var sb=document.getElementById('adminSidebar');
@@ -1497,12 +1380,11 @@ function sbNav(tab){
 // Update sidebar badges from allLeads
 function updateSidebarBadges(){
   if(typeof allLeads==='undefined')return;
-  // === FIX: badge clients = messages non lus uniquement (pas statut leads) ===
-  var unreadTotal=Object.values(_leadUnreadMap||{}).reduce(function(a,b){return a+b;},0);
+  var pendingClients=allLeads.filter(function(l){return l.status==='new'||l.status==='demo';}).length;
   var pendingPay=allLeads.filter(function(l){return l.status==='payment_requested'||l.status==='validated';}).length;
   var bc=document.getElementById('sbBadgeClients');
   var bp=document.getElementById('sbBadgePay');
-  if(bc){bc.textContent=unreadTotal>9?'9+':unreadTotal||'';bc.className='sb-badge'+(unreadTotal?' on':'');}
+  if(bc){bc.textContent=pendingClients||'';bc.className='sb-badge'+(pendingClients?' on':'');}
   if(bp){bp.textContent=pendingPay||'';bp.className='sb-badge'+(pendingPay?' on':'');}
 }
 
@@ -1715,7 +1597,7 @@ function openAddAppModal(){
   _mpEditId=null;
   document.getElementById('mpModalTitle').textContent='Ajouter une application';
   document.getElementById('mpEditId').value='';
-  ['mpName','mpIcon','mpDesc','mpUrl','mpPrice','mpOrigPrice','mpTags','mpPartner','mpThumbUrl'].forEach(id=>{
+  ['mpName','mpIcon','mpDesc','mpUrl','mpPrice','mpOrigPrice','mpTags','mpPartner','mpThumbUrl','mpTagline','mpForWho','mpProblems','mpFeatures'].forEach(id=>{
     var el=document.getElementById(id);if(el)el.value='';
   });
   var prev=document.getElementById('mpThumbPreview');if(prev)prev.style.display='none';
@@ -1742,6 +1624,17 @@ function editMpApp(id){
     document.getElementById('mpTags').value=(d.tags||[]).join(', ');
     document.getElementById('mpPartner').value=d.partner||'';
     document.getElementById('mpActive').checked=d.active!==false;
+    // New info fields
+    var taglineEl=document.getElementById('mpTagline');
+    if(taglineEl)taglineEl.value=d.tagline||'';
+    var forWhoEl=document.getElementById('mpForWho');
+    if(forWhoEl)forWhoEl.value=d.forWho||'';
+    var probEl=document.getElementById('mpProblems');
+    if(probEl)probEl.value=(d.problems||[]).join('\n');
+    var featEl=document.getElementById('mpFeatures');
+    if(featEl)featEl.value=(d.features||[]).map(function(f){
+      return typeof f==='object'?(f.title||'')+'|'+(f.desc||''):f;
+    }).join('\n');
     var tUrlEl=document.getElementById('mpThumbUrl');if(tUrlEl)tUrlEl.value=d.thumbnailUrl||'';
     var tPrev=document.getElementById('mpThumbPreview');
     var tImg=document.getElementById('mpThumbImg');
@@ -1783,6 +1676,18 @@ async function saveMpApp(){
   var thumbUrl=document.getElementById('mpThumbUrl')?.value.trim()||'';
   var thumbImg=document.getElementById('mpThumbImg');
   if(!thumbUrl&&thumbImg&&thumbImg.src&&thumbImg.src.startsWith('data:'))thumbUrl=thumbImg.src;
+  // Parse new info fields
+  var taglineEl=document.getElementById('mpTagline');
+  var forWhoEl=document.getElementById('mpForWho');
+  var probEl=document.getElementById('mpProblems');
+  var featEl=document.getElementById('mpFeatures');
+  var problems=(probEl?probEl.value:'').split('\n').map(s=>s.trim()).filter(Boolean);
+  var features=(featEl?featEl.value:'').split('\n').map(function(line){
+    line=line.trim(); if(!line)return null;
+    var sep=line.indexOf('|');
+    if(sep===-1)return{title:line,desc:''};
+    return{title:line.slice(0,sep).trim(),desc:line.slice(sep+1).trim()};
+  }).filter(Boolean);
   var data={
     name,icon:icon||'📱',description:desc,demoUrl:url,
     price:document.getElementById('mpPrice').value.trim(),
@@ -1791,6 +1696,10 @@ async function saveMpApp(){
     tags,partner:document.getElementById('mpPartner').value.trim(),
     active:document.getElementById('mpActive').checked,
     thumbnailUrl:thumbUrl||null,
+    tagline:(taglineEl?taglineEl.value.trim():''),
+    forWho:(forWhoEl?forWhoEl.value.trim():''),
+    problems:problems,
+    features:features,
     updatedAt:FS.serverTimestamp()
   };
   try{
