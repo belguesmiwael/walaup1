@@ -44,7 +44,15 @@ db.collection('marketplace_apps').onSnapshot(
     _firestoreLoaded = true;
     var all = snap.docs.map(function(d) {
       var data = d.data();
-      return Object.assign({ id: d.id }, data, { src: data.demoUrl || data.src || '' });
+      // Normalize problems/features if stored as strings
+      var problems = data.problems || [];
+      if (typeof problems === 'string') problems = problems.split('\n').filter(Boolean);
+      var features = data.features || [];
+      return Object.assign({ id: d.id }, data, {
+        src: data.demoUrl || data.src || '',
+        problems: problems,
+        features: features
+      });
     });
     _allApps = all.filter(function(a) { return a.active !== false; });
     _allApps.sort(function(a, b) {
@@ -350,8 +358,8 @@ function tryApp(id) {
     btn.classList.remove('done');
   }
 
-  // Start in mobile mode
-  setDeviceMode('mobile', true);
+  // Start in iOS mode
+  setDeviceMode('ios', true);
 
   // Open
   var ov = document.getElementById('demoOv');
@@ -361,13 +369,16 @@ function tryApp(id) {
 
 
 /* ── Scale mobile iframe to fit phone frame ── */
-function scaleMobileIframe() {
-  var screen = document.querySelector('.dov-phone-screen');
-  var frame  = document.getElementById('ovFrame');
+function scaleMobileIframe(frameId) {
+  // Find active phone screen (iOS or Android)
+  var screen = document.querySelector('#dovPhoneWrap .dov-phone-screen') ||
+               document.querySelector('#dovAndroidWrap .dov-phone-screen');
+  var frame  = document.getElementById(frameId || 'ovFrame');
   if (!screen || !frame) return;
-  var mobileWidth = 390; // render width (iPhone 14)
+  var mobileWidth = 390;
   var availW = screen.clientWidth;
   var availH = screen.clientHeight;
+  if (!availW) return;
   var scale  = availW / mobileWidth;
   frame.style.width  = mobileWidth + 'px';
   frame.style.height = Math.ceil(availH / scale) + 'px';
@@ -380,45 +391,64 @@ function _scheduleScale() {
   _scaleRaf = requestAnimationFrame(function() { scaleMobileIframe(); });
 }
 
-/* ── Device mode toggle ── */
+/* ── Device mode toggle — iOS / Android / Web ── */
 function setDeviceMode(mode, skipSound) {
   _curDeviceMode = mode;
-  var phoneWrap = document.getElementById('dovPhoneWrap');
-  var webWrap   = document.getElementById('dovWebWrap');
-  var btnM = document.getElementById('dtgMobile');
-  var btnW = document.getElementById('dtgWeb');
+  var phoneWrap   = document.getElementById('dovPhoneWrap');    // iOS
+  var androidWrap = document.getElementById('dovAndroidWrap');  // Android
+  var webWrap     = document.getElementById('dovWebWrap');      // Web
   var url = _curAppData ? (_curAppData.demoUrl || _curAppData.src || '') : '';
 
-  if (mode === 'mobile') {
+  // Reset all toggle buttons
+  ['dtgIos','dtgAndroid','dtgWeb'].forEach(function(id){
+    var b = document.getElementById(id); if(b) b.classList.remove('active');
+  });
+
+  // Hide all frames
+  if (phoneWrap)   phoneWrap.style.display   = 'none';
+  if (androidWrap) androidWrap.style.display = 'none';
+  if (webWrap)     webWrap.style.display     = 'none';
+
+  if (mode === 'ios') {
     if (phoneWrap) phoneWrap.style.display = 'flex';
-    if (webWrap)   webWrap.style.display   = 'none';
-    if (btnM) btnM.classList.add('active');
-    if (btnW) btnW.classList.remove('active');
-    // Load iframe and scale
+    var b = document.getElementById('dtgIos'); if(b) b.classList.add('active');
     var fr = document.getElementById('ovFrame');
     if (fr) {
       if (fr.src !== url) {
         fr.src = url;
-        fr.onload = function() { scaleMobileIframe(); fr.onload = null; };
+        fr.onload = function() { scaleMobileIframe('ovFrame'); fr.onload = null; };
       }
-      // Scale immediately (even before load — sets dimensions)
-      setTimeout(scaleMobileIframe, 50);
+      setTimeout(function(){ scaleMobileIframe('ovFrame'); }, 50);
     }
-    // Clear web iframe
-    var frW = document.getElementById('ovFrameWeb');
-    if (frW) frW.src = '';
-  } else {
-    if (phoneWrap) phoneWrap.style.display = 'none';
-    if (webWrap)   webWrap.style.display   = 'flex';
-    if (btnM) btnM.classList.remove('active');
-    if (btnW) btnW.classList.add('active');
-    // Load web iframe
+    // Clear others
+    var frA = document.getElementById('ovFrameAndroid'); if(frA) frA.src = '';
+    var frW = document.getElementById('ovFrameWeb');     if(frW) frW.src = '';
+
+  } else if (mode === 'android') {
+    if (androidWrap) androidWrap.style.display = 'flex';
+    var b = document.getElementById('dtgAndroid'); if(b) b.classList.add('active');
+    var frA = document.getElementById('ovFrameAndroid');
+    if (frA) {
+      if (frA.src !== url) {
+        frA.src = url;
+        frA.onload = function() { scaleMobileIframe('ovFrameAndroid'); frA.onload = null; };
+      }
+      setTimeout(function(){ scaleMobileIframe('ovFrameAndroid'); }, 50);
+    }
+    // Clear others
+    var fr  = document.getElementById('ovFrame');    if(fr)  fr.src  = '';
+    var frW = document.getElementById('ovFrameWeb'); if(frW) frW.src = '';
+
+  } else { // web
+    if (webWrap) webWrap.style.display = 'flex';
+    var b = document.getElementById('dtgWeb'); if(b) b.classList.add('active');
     var frW = document.getElementById('ovFrameWeb');
     if (frW && frW.src !== url) frW.src = url;
-    // Clear mobile iframe
-    var fr = document.getElementById('ovFrame');
-    if (fr) fr.src = '';
+    // Clear mobile iframes
+    var fr  = document.getElementById('ovFrame');         if(fr)  fr.src  = '';
+    var frA = document.getElementById('ovFrameAndroid'); if(frA) frA.src = '';
   }
+
   if (!skipSound && window.WalaupSound) WalaupSound.tab();
 }
 
@@ -510,7 +540,8 @@ function toast(msg, type) {
 
 /* ── Keyboard + swipe ── */
 window.addEventListener('resize', function() {
-  if (_curDeviceMode === 'mobile') _scheduleScale();
+  if (_curDeviceMode === 'ios')     { scaleMobileIframe('ovFrame'); }
+  if (_curDeviceMode === 'android') { scaleMobileIframe('ovFrameAndroid'); }
 });
 
 document.addEventListener('keydown', function(e) {

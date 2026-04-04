@@ -151,6 +151,9 @@ function showAdmin(){
   }
   document.getElementById('loginView').style.display='none';
   document.getElementById('adminView').style.display='flex';
+  // Sidebar: show after login
+  var sb=document.getElementById('adminSidebar');
+  if(sb){ sb.classList.add('visible'); sb.style.display='flex'; sb.style.flexDirection='column'; }
   loadLeads();loadTestis();loadTarifs();
   showTab('dash',document.querySelector('.nav-tab'));
 }
