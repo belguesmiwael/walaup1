@@ -3,37 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#03030d">
+<meta name="theme-color" content="#010108">
 <title>Walaup — Admin</title>
-<!-- Remplacer l'ancienne ligne favicon par : -->
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
-<link rel="stylesheet" href="css/effects.css"> 
+<link rel="stylesheet" href="css/effects.css">
 <link rel="stylesheet" href="css/admin.css">
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 <link rel="manifest" href="manifest-admin.json">
 </head>
 <body>
 
-<!-- ── MOBILE SIDEBAR OVERLAY ── -->
+<!-- ── SIDEBAR OVERLAY (mobile) ── -->
 <div class="sidebar-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 
 <!-- ── ADMIN SIDEBAR ── -->
-<div class="admin-sidebar" id="adminSidebar">
+<aside class="admin-sidebar" id="adminSidebar">
   <div class="sb-header">
-    <div class="sb-logo">
-      <a href="admin.html" class="brand-wordmark" style="font-size:1.15rem">Walaup</a>
+    <div class="sb-brand">
+      <span class="sb-brand-name">Walaup</span>
+      <span class="sb-brand-tag">Admin</span>
     </div>
-    <button class="sb-close" onclick="closeSidebar()">✕</button>
+    <button class="sb-close" onclick="closeSidebar()" aria-label="Fermer">
+      <i class="ph-bold ph-x"></i>
+    </button>
   </div>
+
   <nav class="sb-nav">
+    <div class="sb-section-label">Principal</div>
     <div class="sb-item active" id="sbi-dash" onclick="sbNav('dash')">
-      <div class="sb-icon"><i class="ph-bold ph-chart-bar"></i></div>
+      <div class="sb-icon"><i class="ph-bold ph-chart-pie-slice"></i></div>
       <span class="sb-label">Dashboard</span>
     </div>
     <div class="sb-item" id="sbi-clients" onclick="sbNav('clients')">
-      <div class="sb-icon"><i class="ph-bold ph-users"></i></div>
+      <div class="sb-icon"><i class="ph-bold ph-users-three"></i></div>
       <span class="sb-label">Clients</span>
       <span class="sb-badge" id="sbBadgeClients"></span>
     </div>
@@ -42,89 +46,156 @@
       <span class="sb-label">Paiements</span>
       <span class="sb-badge" id="sbBadgePay"></span>
     </div>
-    <div class="sb-item" id="sbi-tarifs" onclick="sbNav('tarifs')">
-      <div class="sb-icon"><i class="ph-bold ph-coins"></i></div>
-      <span class="sb-label">Tarifs</span>
-    </div>
     <div class="sb-item" id="sbi-stats" onclick="sbNav('stats')">
       <div class="sb-icon"><i class="ph-bold ph-trend-up"></i></div>
       <span class="sb-label">Statistiques</span>
     </div>
-    <div class="sb-item" id="sbi-testi" onclick="sbNav('testi')">
-      <div class="sb-icon"><i class="ph-bold ph-star"></i></div>
-      <span class="sb-label">Avis clients</span>
+
+    <div class="sb-section-label">Catalogue</div>
+    <div class="sb-item" id="sbi-tarifs" onclick="sbNav('tarifs')">
+      <div class="sb-icon"><i class="ph-bold ph-tag"></i></div>
+      <span class="sb-label">Tarifs</span>
     </div>
     <div class="sb-item" id="sbi-marketplace" onclick="sbNav('marketplace')">
       <div class="sb-icon"><i class="ph-bold ph-storefront"></i></div>
       <span class="sb-label">Marketplace</span>
     </div>
+    <div class="sb-item" id="sbi-testi" onclick="sbNav('testi')">
+      <div class="sb-icon"><i class="ph-bold ph-star"></i></div>
+      <span class="sb-label">Avis clients</span>
+    </div>
   </nav>
-  <div class="sb-footer">
-    <button class="sb-logout" onclick="logout()">🚪 Déconnexion</button>
-  </div>
-</div>
 
-<!-- LOGIN -->
+  <div class="sb-footer">
+    <button class="sb-logout" onclick="logout()">
+      <i class="ph-bold ph-sign-out"></i>
+      Déconnexion
+    </button>
+  </div>
+</aside>
+
+<!-- ── LOGIN VIEW ── -->
 <div id="loginView">
   <div class="lc">
     <div class="lc-logo">
       <img src="icons/logo-full.svg" alt="Walaup" width="130" style="display:block;margin:0 auto 8px">
     </div>
-    <h2>Accès Admin</h2><p>Réservé à l'équipe Walaup</p>
-    <input type="password" id="passIn" placeholder="Mot de passe admin" onkeydown="if(event.key==='Enter')doLogin()">
+    <h2>Accès Admin</h2>
+    <p>Réservé à l'équipe Walaup</p>
+    <input type="password" id="passIn" placeholder="Mot de passe admin"
+      onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()">Accéder →</button>
     <div class="lerr" id="lerr">❌ Mot de passe incorrect</div>
   </div>
 </div>
 
-<!-- ADMIN -->
+<!-- ── ADMIN VIEW ── -->
 <div id="adminView">
-  <div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="tb-left">
       <button class="ham-btn" id="hamBtn" onclick="toggleSidebar()" aria-label="Menu">
         <span class="ham-line"></span>
         <span class="ham-line"></span>
         <span class="ham-line"></span>
       </button>
-      <div class="tbl" style="display:flex;align-items:center;gap:6px">
+      <div class="tb-brand">
         <a href="admin.html" class="brand-wordmark" style="font-size:1.1rem">Walaup</a>
-        <span style="font-size:.65rem;color:var(--mu);font-weight:500;opacity:.7">Admin</span>
+        <span class="tb-brand-tag">Admin</span>
       </div>
     </div>
-    <div class="nav-tabs">
-      <button class="nav-tab on" onclick="showTab('dash',this)"><i class="ph-bold ph-chart-bar" style="font-size:1rem"></i> Dashboard</button>
-      <button class="nav-tab" onclick="showTab('clients',this)"><i class="ph-bold ph-users" style="font-size:1rem"></i> Clients</button>
-      <button class="nav-tab" onclick="showTab('tarifs',this)"><i class="ph-bold ph-coins" style="font-size:1rem"></i> Tarifs</button>
-      <button class="nav-tab" onclick="showTab('paiements',this)"><i class="ph-bold ph-credit-card" style="font-size:1rem"></i> Paiements</button>
-      <button class="nav-tab" onclick="showTab('stats',this)"><i class="ph-bold ph-trend-up" style="font-size:1rem"></i> Stats</button>
-      <button class="nav-tab" onclick="showTab('testi',this)"><i class="ph-bold ph-star" style="font-size:1rem"></i> Avis</button>
-      <button class="nav-tab" onclick="showTab('marketplace',this)"><i class="ph-bold ph-storefront" style="font-size:1rem"></i> Marketplace</button>
-    </div>
-    <div class="tbr">
+    <div class="tb-right">
+      <div class="tb-notif-wrap">
+        <button class="tb-icon-btn" id="tbNotifBtn" title="Notifications">
+          <i class="ph-bold ph-bell"></i>
+          <span class="tb-notif-dot" id="tbNotifDot" style="display:none"></span>
+        </button>
+      </div>
+      <div class="tb-avatar">W</div>
       <button class="lo-btn" onclick="logout()">Déconnexion</button>
     </div>
-  </div>
+  </header>
 
+  <!-- TAB CONTENT -->
   <div class="tab-content">
 
-    <!-- ── DASHBOARD ── -->
+    <!-- ══ DASHBOARD ══ -->
     <div class="tab-pane" id="dashTab">
-      <div class="stats-row">
-        <div class="stat-card sc-blue"><div class="stat-num" id="stTotal">—</div><div class="stat-lbl">Total clients</div></div>
-        <div class="stat-card sc-green"><div class="stat-num" id="stNew" style="color:var(--ac)">—</div><div class="stat-lbl">Nouvelles</div></div>
-        <div class="stat-card sc-yellow"><div class="stat-num" id="stDemo" style="color:var(--yellow)">—</div><div class="stat-lbl">Démos</div></div>
-        <div class="stat-card sc-purple"><div class="stat-num" id="stVal" style="color:var(--ac2)">—</div><div class="stat-lbl">Validées</div></div>
-        <div class="stat-card sc-red"><div class="stat-num" id="stConv" style="color:var(--green)">—</div><div class="stat-lbl">Livrées</div></div>
+
+      <!-- KPI Row -->
+      <div class="kpi-row">
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-icon"><i class="ph-bold ph-users-three"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-val" id="stTotal">—</div>
+            <div class="kpi-lbl">Total clients</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-cyan">
+          <div class="kpi-icon"><i class="ph-bold ph-sparkle"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-val" id="stNew">—</div>
+            <div class="kpi-lbl">Nouvelles demandes</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-icon"><i class="ph-bold ph-play-circle"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-val" id="stDemo">—</div>
+            <div class="kpi-lbl">Démos en cours</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon"><i class="ph-bold ph-check-circle"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-val" id="stVal">—</div>
+            <div class="kpi-lbl">Validées</div>
+          </div>
+        </div>
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-icon"><i class="ph-bold ph-rocket-launch"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-val" id="stConv">—</div>
+            <div class="kpi-lbl">Livrées</div>
+          </div>
+        </div>
       </div>
+
+      <!-- Dashboard Grid -->
       <div class="dash-grid">
-        <div class="card"><div class="card-hd"><h3>📋 Activité récente</h3></div><div class="card-bd" id="actFeed" style="padding:0 14px"></div></div>
-        <div class="card dash-clients-card"><div class="card-hd"><h3>🏆 Clients récents</h3></div><div class="card-bd" id="topClients" style="padding:0 14px"></div></div>
-        <div class="card"><div class="card-hd"><h3>📦 Par type</h3></div><div class="card-bd"><div class="chart-bars" id="chartType"></div></div></div>
-        <div class="card"><div class="card-hd"><h3>💳 Par pack</h3></div><div class="card-bd"><div class="chart-bars" id="chartPack"></div></div></div>
+        <div class="card">
+          <div class="card-hd">
+            <span class="card-hd-icon"><i class="ph-bold ph-activity"></i></span>
+            <h3>Activité récente</h3>
+          </div>
+          <div class="card-bd" id="actFeed" style="padding:0 14px"></div>
+        </div>
+        <div class="card dash-clients-card">
+          <div class="card-hd">
+            <span class="card-hd-icon"><i class="ph-bold ph-users"></i></span>
+            <h3>Clients récents</h3>
+          </div>
+          <div class="card-bd" id="topClients" style="padding:0 14px"></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <span class="card-hd-icon"><i class="ph-bold ph-squares-four"></i></span>
+            <h3>Par type d'app</h3>
+          </div>
+          <div class="card-bd"><div class="chart-bars" id="chartType"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <span class="card-hd-icon"><i class="ph-bold ph-package"></i></span>
+            <h3>Par pack</h3>
+          </div>
+          <div class="card-bd"><div class="chart-bars" id="chartPack"></div></div>
+        </div>
       </div>
     </div>
 
-    <!-- ── CLIENTS ── -->
+    <!-- ══ CLIENTS ══ -->
     <div class="tab-pane" id="clientsTab">
       <div class="clients-layout">
         <div class="cl-list">
@@ -143,7 +214,10 @@
         </div>
 
         <div class="client-detail">
-          <div class="cd-empty" id="cdEmpty"><div style="font-size:3rem">👆</div><div style="font-weight:700">Sélectionnez un client</div></div>
+          <div class="cd-empty" id="cdEmpty">
+            <div style="font-size:3rem">👆</div>
+            <div style="font-weight:700">Sélectionnez un client</div>
+          </div>
           <div id="cdContent" style="display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0">
 
             <div class="cd-header">
@@ -170,26 +244,26 @@
                 <button class="btn-sm" onclick="copyClientInfo()"><i class="ph-bold ph-clipboard-text"></i> Copier</button>
                 <button class="btn-sm danger" onclick="deleteClient()"><i class="ph-bold ph-trash"></i> Supprimer</button>
               </div>
-              <!-- Payment alert -->
+              <!-- Payment alert banner -->
               <div id="payAlertBanner" style="display:none;width:100%;background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(251,191,36,.06));border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:11px 14px;margin-top:7px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
                 <div>
                   <div style="font-size:.78rem;font-weight:800;color:var(--yellow);margin-bottom:2px" id="payAlertTitle">💳 Démo validée</div>
                   <div style="font-size:.7rem;color:var(--mu)" id="payAlertSub">Le client a validé la démo — envoyez la version finale.</div>
                 </div>
                 <div style="display:flex;gap:6px;flex-wrap:wrap">
-                  <button onclick="requestPayment()" style="padding:7px 13px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--yellow),var(--orange));color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:.74rem;cursor:pointer">💳 Confirmer paiement reçu</button>
-                  <button onclick="switchInputTab('demo',document.querySelector('.itab:nth-child(2)'))" style="padding:7px 13px;border-radius:8px;border:1px solid rgba(52,211,153,.3);background:rgba(52,211,153,.1);color:var(--green);font-family:'Syne',sans-serif;font-weight:800;font-size:.74rem;cursor:pointer">🏁 Envoyer version finale</button>
+                  <button onclick="requestPayment()" style="padding:7px 13px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--yellow),var(--orange));color:#000;font-family:'Outfit',sans-serif;font-weight:800;font-size:.74rem;cursor:pointer">💳 Confirmer paiement reçu</button>
+                  <button onclick="switchInputTab('demo',document.querySelector('.itab:nth-child(2)'))" style="padding:7px 13px;border-radius:8px;border:1px solid rgba(52,211,153,.3);background:rgba(52,211,153,.1);color:var(--green);font-family:'Outfit',sans-serif;font-weight:800;font-size:.74rem;cursor:pointer">🏁 Envoyer version finale</button>
                 </div>
               </div>
             </div>
 
-            <!-- ── BARRE DE DEMANDES (multi-app par client) ── -->
+            <!-- Barre de demandes (multi-app) -->
             <div class="demands-bar" id="demandsBar" style="display:none">
               <span class="demands-bar-label">📱 Demandes :</span>
               <div id="demandBtns" style="display:flex;gap:5px;flex-wrap:nowrap"></div>
             </div>
 
-            <!-- ── NAVIGATION SECTIONS FICHE CLIENT ── -->
+            <!-- Navigation sections fiche client -->
             <nav class="cd-nav">
               <button class="cd-nav-btn on" onclick="showCdSection('fiche',this)">
                 <i class="ph-bold ph-user"></i><span>Fiche</span>
@@ -206,7 +280,7 @@
               </button>
             </nav>
 
-            <!-- ── SECTION : FICHE ── -->
+            <!-- Section : Fiche -->
             <div class="cd-section on" id="cdSectionFiche">
               <div class="cd-section-scroll">
                 <div class="info-sec">
@@ -216,7 +290,7 @@
               </div>
             </div>
 
-            <!-- ── SECTION : MESSAGERIE ── -->
+            <!-- Section : Messagerie -->
             <div class="cd-section" id="cdSectionMessagerie">
               <div class="chat-msgs" id="adminChatMsgs"></div>
               <div class="input-area">
@@ -255,7 +329,7 @@
               </div>
             </div>
 
-            <!-- ── SECTION : HISTORIQUE ── -->
+            <!-- Section : Historique -->
             <div class="cd-section" id="cdSectionHistorique">
               <div class="cd-section-scroll">
                 <div id="clientHistorique" class="historique-list">
@@ -264,7 +338,7 @@
               </div>
             </div>
 
-            <!-- ── SECTION : PROMPT ── -->
+            <!-- Section : Prompt -->
             <div class="cd-section" id="cdSectionPrompt">
               <div class="cd-section-scroll">
                 <div class="prompt-panel" style="border-radius:0;border:none">
@@ -280,18 +354,18 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+
+          </div><!-- end cdContent -->
+        </div><!-- end client-detail -->
+      </div><!-- end clients-layout -->
     </div>
 
-    <!-- ── TARIFS ── -->
+    <!-- ══ TARIFS ══ -->
     <div class="tab-pane" id="tarifsTab">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-shrink:0">
         <h2 style="font-size:1rem;font-weight:800">💰 Grille tarifaire</h2>
         <button class="btn-save-tarifs" onclick="saveTarifs()">💾 Sauvegarder tout</button>
       </div>
-      <!-- Packs -->
       <div>
         <h3 style="font-size:.82rem;font-weight:800;margin-bottom:11px;color:var(--mu)">PACKS</h3>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:13px">
@@ -310,9 +384,9 @@
                 <div class="remise-fg"><label>Motif</label><input type="text" id="mEss" placeholder="Ex: Client fidèle"></div>
                 <button class="btn-remise" onclick="applyRemise('essentiel')">Appliquer</button>
               </div>
-              <div class="active-remise" id="remEss" style="display:none">
-                <span id="remEssTxt"></span>
-                <button onclick="cancelRemise('essentiel')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.72rem;font-family:'Plus Jakarta Sans',sans-serif">✕ Annuler</button>
+              <div class="active-remise" id="remEssentiel" style="display:none">
+                <span id="remEssentielTxt"></span>
+                <button onclick="cancelRemise('essentiel')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.72rem;font-family:'Outfit',sans-serif">✕ Annuler</button>
               </div>
             </div>
           </div>
@@ -333,7 +407,7 @@
               </div>
               <div class="active-remise" id="remPro" style="display:none">
                 <span id="remProTxt"></span>
-                <button onclick="cancelRemise('pro')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.72rem;font-family:'Plus Jakarta Sans',sans-serif">✕ Annuler</button>
+                <button onclick="cancelRemise('pro')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.72rem;font-family:'Outfit',sans-serif">✕ Annuler</button>
               </div>
             </div>
           </div>
@@ -352,22 +426,21 @@
                 <div class="remise-fg"><label>Motif</label><input type="text" id="mPar" placeholder="Ex: ONG / Partenariat"></div>
                 <button class="btn-remise" onclick="applyRemise('partenaire')">Appliquer</button>
               </div>
-              <div class="active-remise" id="remPar" style="display:none">
-                <span id="remParTxt"></span>
-                <button onclick="cancelRemise('partenaire')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.72rem;font-family:'Plus Jakarta Sans',sans-serif">✕ Annuler</button>
+              <div class="active-remise" id="remPartenaire" style="display:none">
+                <span id="remPartenaireTxt"></span>
+                <button onclick="cancelRemise('partenaire')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.72rem;font-family:'Outfit',sans-serif">✕ Annuler</button>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <!-- Fonctionnalités -->
-      <div>
+      <div style="margin-top:18px">
         <h3 style="font-size:.82rem;font-weight:800;margin-bottom:11px;color:var(--mu)">FONCTIONNALITÉS (prix unitaire DT)</h3>
-        <div class="tarifs-grid" id="tarifsGrid"><!-- Rendered by JS --></div>
+        <div class="tarifs-grid" id="tarifsGrid"></div>
       </div>
     </div>
 
-    <!-- ── PAIEMENTS ── -->
+    <!-- ══ PAIEMENTS ══ -->
     <div class="tab-pane" id="paiementsTab">
       <div class="pay-stats">
         <div class="stat-card sc-green"><div class="stat-num" id="payTotal">0 DT</div><div class="stat-lbl">Total encaissé</div></div>
@@ -388,7 +461,15 @@
         <div style="overflow-x:auto">
           <table>
             <thead>
-              <tr><th>Client</th><th>Pack</th><th>Montant</th><th>Méthode</th><th>Statut</th><th>Date</th><th>Action</th></tr>
+              <tr>
+                <th>Client</th>
+                <th>Pack</th>
+                <th>Montant</th>
+                <th>Méthode</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
             </thead>
             <tbody id="payTable"></tbody>
           </table>
@@ -396,7 +477,7 @@
       </div>
     </div>
 
-    <!-- ── STATS ── -->
+    <!-- ══ STATS ══ -->
     <div class="tab-pane" id="statsTab">
       <div class="stats-row">
         <div class="stat-card sc-blue"><div class="stat-num" id="st2Total">—</div><div class="stat-lbl">Total</div></div>
@@ -411,7 +492,7 @@
       </div>
     </div>
 
-    <!-- ── TESTIMONIALS ── -->
+    <!-- ══ AVIS CLIENTS ══ -->
     <div class="tab-pane" id="testiTab">
       <div class="testi-form">
         <h3>➕ Ajouter un témoignage</h3>
@@ -428,7 +509,7 @@
       </div>
     </div>
 
-    <!-- ── MARKETPLACE ── -->
+    <!-- ══ MARKETPLACE ══ -->
     <div class="tab-pane" id="marketplaceTab">
       <div style="padding:16px;width:100%;height:100%;overflow-y:auto;box-sizing:border-box">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
@@ -438,14 +519,12 @@
           </div>
           <button class="btn-sm primary" onclick="openAddAppModal()">+ Ajouter une app</button>
         </div>
-        <!-- Stats -->
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px" id="mpStats">
           <div class="stat-card"><div class="stat-lbl">Total apps</div><div class="stat-val" id="mpTotal">0</div></div>
           <div class="stat-card"><div class="stat-lbl">Publiées</div><div class="stat-val" id="mpActiveCount">0</div></div>
           <div class="stat-card"><div class="stat-lbl">Masquées</div><div class="stat-val" id="mpHidden">0</div></div>
           <div class="stat-card"><div class="stat-lbl">Achetées</div><div class="stat-val" id="mpSold">0</div></div>
         </div>
-        <!-- Apps list -->
         <div id="mpAppsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
           <div style="text-align:center;padding:28px;color:var(--mu);font-size:.8rem">
             <div style="font-size:2rem;margin-bottom:8px">🏪</div>
@@ -462,12 +541,11 @@
           <input type="hidden" id="mpEditId">
           <div class="fg"><label>Nom de l'application *</label><input id="mpName" placeholder="App Café & Restaurant"></div>
           <div class="fg"><label>Icône (emoji) *</label><input id="mpIcon" placeholder="☕" maxlength="4" style="max-width:80px"></div>
-          <div class="fg"><label>Description *</label><textarea id="mpDesc" rows="2" placeholder="Description courte visible par les clients..." style="resize:vertical;min-height:60px;padding:9px 11px;border-radius:9px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;outline:none;width:100%"></textarea></div>
+          <div class="fg"><label>Description *</label><textarea id="mpDesc" rows="2" placeholder="Description courte visible par les clients..." style="resize:vertical;min-height:60px;padding:9px 11px;border-radius:9px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Outfit',sans-serif;font-size:.82rem;outline:none;width:100%"></textarea></div>
           <div class="fg">
             <label>🖼 Miniature (URL ou fichier)</label>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <input id="mpThumbUrl" type="url" placeholder="https://image.jpg"
-                style="flex:1;min-width:140px"
+              <input id="mpThumbUrl" type="url" placeholder="https://image.jpg" style="flex:1;min-width:140px"
                 oninput="(function(v){var i=document.getElementById('mpThumbImg'),p=document.getElementById('mpThumbPreview');if(v&&i&&p){i.src=v;p.style.display='block';}else if(p){p.style.display='none';}})(this.value)">
               <label style="padding:7px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);cursor:pointer;font-size:.76rem;font-weight:600;white-space:nowrap;flex-shrink:0">
                 📁 Fichier
@@ -481,8 +559,9 @@
           <div class="fg"><label>URL de la démo (PWA/HTML) *</label><input id="mpUrl" type="url" placeholder="https://..."></div>
           <div class="fg"><label>Prix (ex: 299 DT)</label><input id="mpPrice" placeholder="299 DT"></div>
           <div class="fg"><label>Prix original barré (ex: 450 DT)</label><input id="mpOrigPrice" placeholder="450 DT"></div>
-          <div class="fg"><label>Catégorie</label>
-            <select id="mpCat" style="padding:9px 11px;border-radius:9px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;width:100%">
+          <div class="fg">
+            <label>Catégorie</label>
+            <select id="mpCat" style="padding:9px 11px;border-radius:9px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Outfit',sans-serif;font-size:.82rem;width:100%">
               <option value="cafe">☕ Café / Restaurant</option>
               <option value="commerce">🏪 Commerce</option>
               <option value="services">⚙️ Services</option>
@@ -505,9 +584,51 @@
     </div>
 
   </div><!-- end tab-content -->
-</div><!-- end admin-view -->
+</div><!-- end adminView -->
 
-</div><!-- end #adminView -->
+<!-- ── PAYMENT METHOD MODAL ── -->
+<div id="payMethodModal" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px">
+  <div class="pay-modal-box">
+    <div class="pay-modal-hd">
+      <div class="pay-modal-ico">💳</div>
+      <div>
+        <div class="pay-modal-title">Confirmer le paiement</div>
+        <div class="pay-modal-sub" id="payModalSub">Client · Pack</div>
+      </div>
+      <button class="pay-modal-close" onclick="closePayMethodModal()"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <div class="pay-modal-amount" id="payModalAmount">0 DT</div>
+    <div class="pay-modal-label">Méthode de paiement reçu</div>
+    <div class="pay-method-grid" id="payMethodGrid">
+      <button class="pay-method-btn" data-method="Virement" onclick="selectPayMethod(this)">
+        <i class="ph-bold ph-bank"></i> Virement
+      </button>
+      <button class="pay-method-btn" data-method="Chèque" onclick="selectPayMethod(this)">
+        <i class="ph-bold ph-note"></i> Chèque
+      </button>
+      <button class="pay-method-btn" data-method="Cash" onclick="selectPayMethod(this)">
+        <i class="ph-bold ph-money"></i> Cash
+      </button>
+      <button class="pay-method-btn" data-method="Konnect" onclick="selectPayMethod(this)">
+        <i class="ph-bold ph-device-mobile"></i> Konnect
+      </button>
+      <button class="pay-method-btn" data-method="Flouci" onclick="selectPayMethod(this)">
+        <i class="ph-bold ph-device-mobile"></i> Flouci
+      </button>
+      <button class="pay-method-btn" data-method="Autre" onclick="selectPayMethod(this)">
+        <i class="ph-bold ph-dots-three"></i> Autre
+      </button>
+    </div>
+    <input type="hidden" id="payModalLeadId">
+    <input type="hidden" id="payModalMethod" value="">
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn-sm" onclick="closePayMethodModal()" style="flex:1;padding:11px">Annuler</button>
+      <button class="btn-sm primary pay-confirm-btn" id="payModalConfirmBtn" onclick="executePaymentConfirm()" disabled style="flex:2;padding:11px;opacity:.5">
+        ✅ Confirmer le paiement
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- ── FLOATING CHAT BUBBLE ── -->
 <button class="chat-bubble-btn" id="chatBubbleBtn" onclick="toggleChatOverlay()" title="Messages client">
@@ -557,12 +678,10 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-<!-- Shared -->
 <script src="js/firebase-config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/sound.js"></script>
-<script src="js/effects.js"></script>  <!-- ← ajouter ici -->
-<!-- Admin logic -->
+<script src="js/effects.js"></script>
 <script src="js/admin.js"></script>
 </body>
 </html>
