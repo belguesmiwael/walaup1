@@ -75,6 +75,88 @@
   </div>
 </div>
 
+
+<!-- ══════════════════════════════════════════════════════
+     INFO PANEL — App detail sheet
+══════════════════════════════════════════════════════ -->
+<div id="infoPanel">
+  <div class="ip-backdrop" onclick="closeInfoPanel()"></div>
+  <div class="ip-sheet">
+
+    <!-- Sticky header -->
+    <div class="ip-header">
+      <div class="ip-app-meta">
+        <div class="ip-icon" id="ipIcon">📱</div>
+        <div class="ip-title-wrap">
+          <div class="ip-name" id="ipName">Application</div>
+          <div class="ip-partner" id="ipPartner"></div>
+        </div>
+      </div>
+      <button class="ip-close" onclick="closeInfoPanel()">
+        <i class="ph-bold ph-x"></i>
+      </button>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="ip-body">
+
+      <!-- Thumbnail -->
+      <div class="ip-thumb-wrap" id="ipThumbWrap" style="display:none">
+        <img class="ip-thumb" id="ipThumb" src="" alt="">
+      </div>
+
+      <!-- Tagline -->
+      <div class="ip-tagline" id="ipTagline" style="display:none"></div>
+
+      <!-- Price + for who -->
+      <div class="ip-meta-row">
+        <div class="ip-price-badge" id="ipPrice"></div>
+        <div class="ip-forwho" id="ipForWho" style="display:none">
+          <i class="ph-bold ph-users"></i>
+          <span id="ipForWhoTxt"></span>
+        </div>
+      </div>
+
+      <!-- Problems solved -->
+      <div class="ip-section" id="ipProblemsSection" style="display:none">
+        <div class="ip-section-title">
+          <span class="ip-sec-icon">❌</span>
+          Problèmes résolus
+        </div>
+        <ul class="ip-problems-list" id="ipProblemsList"></ul>
+      </div>
+
+      <!-- Key features -->
+      <div class="ip-section" id="ipFeaturesSection" style="display:none">
+        <div class="ip-section-title">
+          <span class="ip-sec-icon">✅</span>
+          Ce que fait cette app
+        </div>
+        <div class="ip-features-grid" id="ipFeaturesList"></div>
+      </div>
+
+      <!-- Tags -->
+      <div class="ip-tags-row" id="ipTagsRow" style="display:none">
+        <div id="ipTagsList"></div>
+      </div>
+
+    </div><!-- end ip-body -->
+
+    <!-- Fixed bottom CTAs -->
+    <div class="ip-footer">
+      <button class="ip-btn-try" onclick="onInfoTry()">
+        <i class="ph-bold ph-play-circle"></i>
+        Essayer la démo
+      </button>
+      <button class="ip-btn-buy" onclick="onInfoBuy()">
+        <i class="ph-bold ph-shopping-cart-simple"></i>
+        Acheter cette app
+      </button>
+    </div>
+
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════════════════
      DEMO OVERLAY — Full screen, mobile/web toggle, 3 CTAs
 ══════════════════════════════════════════════════════ -->
@@ -119,7 +201,7 @@
         <div class="dov-phone-notch"></div>
         <div class="dov-phone-screen">
           <iframe class="dov-frame" id="ovFrame" src=""
-            sandbox="allow-scripts allow-forms allow-popups allow-same-origin"></iframe>
+            sandbox="allow-scripts allow-forms allow-popups"></iframe>
         </div>
         <div class="dov-phone-home"></div>
       </div>
@@ -137,7 +219,7 @@
           <div class="dov-url-bar" id="dovUrlBar">walaup.app/demo</div>
         </div>
         <iframe class="dov-frame-web" id="ovFrameWeb" src=""
-          sandbox="allow-scripts allow-forms allow-popups allow-same-origin"></iframe>
+          sandbox="allow-scripts allow-forms allow-popups"></iframe>
       </div>
     </div>
 

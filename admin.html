@@ -293,11 +293,6 @@
             <!-- Section : Messagerie -->
             <div class="cd-section" id="cdSectionMessagerie">
               <div class="chat-msgs" id="adminChatMsgs"></div>
-              <!-- Typing indicator -->
-              <div class="typing-indicator" id="adminTypingIndicator">
-                <div class="typing-dots"><span></span><span></span><span></span></div>
-                <span class="typing-label" id="adminTypingLabel">Le client écrit…</span>
-              </div>
               <div class="input-area">
                 <div class="input-tabs">
                   <button class="itab on" onclick="switchInputTab('msg',this)">✉️ Message</button>
@@ -576,6 +571,36 @@
           </div>
           <div class="fg"><label>Tags (séparés par virgule)</label><input id="mpTags" placeholder="Commandes, Caisse, Stock"></div>
           <div class="fg"><label>Partenaire (optionnel)</label><input id="mpPartner" placeholder="Café Beb Lmdina"></div>
+
+          <!-- ── SECTION INFO CLIENT ── -->
+          <div style="margin:14px 0 10px;padding-top:12px;border-top:1px solid var(--bd)">
+            <div style="font-size:.72rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
+              📋 Informations client
+            </div>
+
+            <div class="fg">
+              <label>Phrase d'accroche</label>
+              <input id="mpTagline" placeholder="Ex: Gérez votre café comme un pro, en 5 min chrono">
+            </div>
+
+            <div class="fg">
+              <label>Pour qui ? (cible)</label>
+              <input id="mpForWho" placeholder="Ex: Cafés, restaurants, snacks, pizzerias">
+            </div>
+
+            <div class="fg">
+              <label>Problèmes résolus <span style="font-size:.65rem;font-weight:400;color:var(--mu)">(un par ligne)</span></label>
+              <textarea id="mpProblems" rows="4" placeholder="Gestion manuelle chronophage&#10;Erreurs de caisse fréquentes&#10;Suivi stock impossible&#10;Pertes financières invisibles"
+                style="padding:9px 11px;border-radius:9px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Outfit',sans-serif;font-size:.82rem;outline:none;width:100%;resize:vertical;line-height:1.5"></textarea>
+            </div>
+
+            <div class="fg">
+              <label>Fonctionnalités clés <span style="font-size:.65rem;font-weight:400;color:var(--mu)">(format: Titre | Description, une par ligne)</span></label>
+              <textarea id="mpFeatures" rows="5" placeholder="🛒 Commandes par table | Prenez les commandes en 3 clics&#10;💰 Caisse intégrée | Encaissements rapides, zéro erreur&#10;📊 Rapports journaliers | Voyez vos bénéfices en temps réel"
+                style="padding:9px 11px;border-radius:9px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Outfit',sans-serif;font-size:.82rem;outline:none;width:100%;resize:vertical;line-height:1.5"></textarea>
+            </div>
+          </div>
+
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
             <input type="checkbox" id="mpActive" checked style="accent-color:var(--green);width:15px;height:15px">
             <label for="mpActive" style="font-size:.82rem;font-weight:600;cursor:pointer">Publiée sur la marketplace</label>
