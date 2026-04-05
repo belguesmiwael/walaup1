@@ -57,27 +57,45 @@
 <!-- HERO -->
 <section id="hero">
   <div class="hero-wrap">
+
+    <!-- ── GAUCHE : copy + AI Box ── -->
     <div class="hero-left">
       <div class="h-tag r">
         <div class="pulse"></div>
-        <span data-k="hb">Walaup — Custom Apps Studio</span>
+        <i class="ph-bold ph-sparkle" style="font-size:.85rem"></i>
+        <span data-k="hb">Décrivez. On construit. En 48h.</span>
       </div>
+
       <h1 class="h-title r2">
-        <span data-k="h1">On transforme</span><br>
-        <span class="line2" data-k="h2">votre business</span><br>
-        <span data-k="h3">en <span class="grad">application</span></span>
+        <span data-k="h1">Décrivez votre</span><br>
+        <span class="line2" data-k="h2">business</span><span class="h-title-comma">,</span><br>
+        <span data-k="h3">on crée votre <span class="grad">application</span></span>
       </h1>
-      <p class="h-sub r3" data-k="hs">Automatisez votre business, gagnez du temps et éliminez les erreurs — app 100% sur mesure, livrée en quelques jours.</p>
-      <div class="h-btns r4">
-        <button class="btn-p" onclick="goEstimateur()">
-          <span data-k="hc1">Créer ma démo gratuite</span>
-          <span class="arr"><i class="ph-bold ph-arrow-right"></i></span>
-        </button>
-        <button class="btn-o" onclick="document.getElementById('solutions').scrollIntoView({behavior:'smooth'})">
-          <i class="ph-bold ph-play-circle"></i>
-          <span data-k="hc2">Voir les exemples</span>
+
+      <p class="h-sub r3" data-k="hs">Quelques mots suffisent. Notre équipe transforme votre idée en app sur mesure — démo gratuite, sans paiement avant validation.</p>
+
+      <!-- ── AI MAGIC BOX ── -->
+      <div class="ai-magic-box r4" id="aiBox">
+        <div class="ai-input-row">
+          <div class="ai-orb"><i class="ph-bold ph-cpu"></i></div>
+          <div class="ai-typed-wrap">
+            <span id="aiTyped" class="ai-typed"></span><span class="ai-caret" id="aiCaret">|</span>
+          </div>
+        </div>
+        <button class="ai-gen-btn" id="aiGenBtn" onclick="generateApp()">
+          <i class="ph-bold ph-rocket-launch" id="aiGenIcon"></i>
+          <span id="aiGenLabel">Générer</span>
         </button>
       </div>
+
+      <!-- Chips suggestion -->
+      <div class="ai-chips r4">
+        <button class="ai-chip" onclick="triggerChip('café')"><i class="ph-bold ph-coffee"></i> App Café</button>
+        <button class="ai-chip" onclick="triggerChip('stock')"><i class="ph-bold ph-package"></i> App Stock</button>
+        <button class="ai-chip" onclick="triggerChip('livraison')"><i class="ph-bold ph-motorcycle"></i> Livraison</button>
+        <button class="ai-chip" onclick="triggerChip('dettes')"><i class="ph-bold ph-money"></i> Dettes</button>
+      </div>
+
       <div class="h-proof r5">
         <div class="avs">
           <span style="background:linear-gradient(135deg,#6c8fff,#b07cff);color:#fff">K</span>
@@ -88,12 +106,16 @@
         <p class="proof-txt" data-k="hp"><strong>+20 clients</strong> font confiance à Walaup</p>
       </div>
     </div>
+
+    <!-- ── DROITE : Phone animé 3 états ── -->
     <div class="h-right">
       <div class="phone-scene">
-        <div class="phone-glow"></div>
-        <div class="phone">
+        <div class="phone-glow" id="phoneGlow"></div>
+        <div class="phone" id="heroPhone">
           <div class="notch"></div>
-          <div class="pscreen">
+
+          <!-- État 0 : dashboard idle -->
+          <div class="pscreen" id="phoneIdle">
             <div class="ptop"><span class="papp">Walaup App</span><span class="pdt">Auj. 14:32</span></div>
             <div class="pcard">
               <div class="plbl">Ventes du jour</div>
@@ -109,9 +131,58 @@
               <div class="bars"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             </div>
           </div>
+
+          <!-- État 1 : génération en cours -->
+          <div class="pscreen pgen-screen" id="phoneGenerating" style="display:none">
+            <div class="pgen-header">
+              <div class="pgen-orb"><i class="ph-bold ph-cpu"></i></div>
+              <div>
+                <div class="pgen-title" id="pgenTitle">Génération…</div>
+                <div class="pgen-sub">Walaup IA Studio</div>
+              </div>
+            </div>
+            <div class="pgen-bar-wrap">
+              <div class="pgen-bar" id="pgenBar"></div>
+            </div>
+            <div class="pgen-pct" id="pgenPct">0%</div>
+            <div class="pgen-tasks">
+              <div class="pgen-task" id="pt1"><i class="ph-bold ph-circle" class="ptk-ico"></i><span>Interface utilisateur</span></div>
+              <div class="pgen-task" id="pt2"><i class="ph-bold ph-circle" class="ptk-ico"></i><span>Base de données</span></div>
+              <div class="pgen-task" id="pt3"><i class="ph-bold ph-circle" class="ptk-ico"></i><span>Authentification</span></div>
+              <div class="pgen-task" id="pt4"><i class="ph-bold ph-circle" class="ptk-ico"></i><span>Tableau de bord</span></div>
+            </div>
+          </div>
+
+          <!-- État 2 : app générée -->
+          <div class="pscreen pdone-screen" id="phoneDone" style="display:none">
+            <div class="pdone-banner">
+              <i class="ph-bold ph-check-circle" style="color:#34d399;font-size:1rem"></i>
+              <span id="pdoneLabel">App générée !</span>
+            </div>
+            <div class="ptop" style="margin-top:8px">
+              <span class="papp" id="pdoneAppName">Mon App</span>
+              <span class="pdt">En ligne ✓</span>
+            </div>
+            <div class="pcard" id="pdoneCard">
+              <div class="plbl" id="pdoneCardLbl">Chiffre du jour</div>
+              <div class="pamt" id="pdoneAmt">2 847 DT</div>
+              <div class="ptrd" id="pdoneTrd"><i class="ph-bold ph-trend-up" style="font-size:.65rem;margin-right:3px"></i>+18% vs hier</div>
+            </div>
+            <div class="pgrid">
+              <div class="pstat pdone-s1"><div class="psn" id="pdoneS1n">142</div><div class="psl" id="pdoneS1l">Transactions</div></div>
+              <div class="pstat pdone-s2"><div class="psn" id="pdoneS2n" style="color:var(--green)"><i class="ph-bold ph-check-circle" style="font-size:.85rem"></i></div><div class="psl" id="pdoneS2l">En ligne</div></div>
+            </div>
+            <div class="pdone-cta-row">
+              <button class="pdone-cta" onclick="goEstimateur()">
+                <i class="ph-bold ph-rocket-launch"></i> Je veux la mienne
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
+
   </div>
 </section>
 
