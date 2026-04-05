@@ -237,7 +237,6 @@ window.goEstimateur = function() {
   if (!f.src) f.src = 'estimateur.html';
   m.classList.add('open');
   document.body.style.overflow = 'hidden';
-  if (window.WalaupSound) WalaupSound.tab();
 };
 window.closeEst = function() {
   document.getElementById('estModal').classList.remove('open');
@@ -253,41 +252,15 @@ document.addEventListener('keydown', function(e) {
 
 /* ── APPS DATA ── */
 var APPS = [
-  {
-    name: 'Café Beb Lmdina',
-    url: 'https://belguesmiwael.github.io/walaup1/demos/cafe/',
-    price: 299
-  },
-  {
-    name: 'RechargeHub TN',
-    url: 'https://belguesmiwael.github.io/walaup1/demos/grossiste/',
-    price: 349
-  },
-  {
-    name: 'Debt Manager Pro',
-    url: 'https://belguesmiwael.github.io/walaup1/demos/dettes/',
-    price: 249
-  }
+  { name:'Café Beb Lmdina',   url:'https://belguesmiwael.github.io/walaup1/demos/cafe/',      price:299 },
+  { name:'RechargeHub TN',    url:'https://belguesmiwael.github.io/walaup1/demos/grossiste/', price:349 },
+  { name:'Debt Manager Pro',  url:'https://belguesmiwael.github.io/walaup1/demos/dettes/',    price:249 }
 ];
 
-/* ── APP MODAL ── */
-window.openApp = function(idx) {
-  var app  = APPS[idx];
-  if (!app) return;
-  var modal = document.getElementById('appModal');
-  var frame = document.getElementById('mFrame');
-  var name  = document.getElementById('mName');
-  if (name) name.textContent = app.name;
-  if (frame) frame.src = app.url || '';
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  if (window.WalaupSound) WalaupSound.click();
-  // Store current app for buy button
-  window._curAppIdx = idx;
-};
+/* ── APP MODAL (removed — screenshots section is visual only) ── */
 window.closeAppModal = function() {
   var modal = document.getElementById('appModal');
-  modal.classList.remove('open');
+  if (modal) { modal.classList.remove('open'); }
   document.body.style.overflow = '';
   var frame = document.getElementById('mFrame');
   if (frame) frame.src = '';
@@ -296,7 +269,6 @@ window.buyThisApp = function() {
   closeAppModal();
   var contact = document.getElementById('contact');
   if (contact) contact.scrollIntoView({ behavior: 'smooth' });
-  if (window.WalaupSound) WalaupSound.success();
 };
 
 /* ── MARKETPLACE PREVIEW — Load from Firestore ── */
@@ -408,15 +380,15 @@ function renderMpPreview(apps) {
   });
 }
 
-/* ── MARKET APP MODAL (index page) ── */
+/* ── MARKET APP MODAL — même comportement que marketplace.html ── */
 var STATIC_MARKET = [
-  { name:'App Café & Restaurant', price:'299 DT', url:'https://belguesmiwael.github.io/walaup1/demos/cafe/' },
-  { name:'App Grossiste / Recharge', price:'349 DT', url:'https://belguesmiwael.github.io/walaup1/demos/grossiste/' },
-  { name:'App Suivi Dettes', price:'249 DT', url:'https://belguesmiwael.github.io/walaup1/demos/dettes/' }
+  { name:'App Café & Restaurant',    price:'299', demoUrl:'https://belguesmiwael.github.io/walaup1/demos/cafe/' },
+  { name:'App Grossiste / Recharge', price:'349', demoUrl:'https://belguesmiwael.github.io/walaup1/demos/grossiste/' },
+  { name:'App Suivi Dettes',         price:'249', demoUrl:'https://belguesmiwael.github.io/walaup1/demos/dettes/' }
 ];
 
 window.openMarketApp = function(idx) {
-  var app = _mpApps.length > idx ? _mpApps[idx] : STATIC_MARKET[idx];
+  var app = (_mpApps.length > idx) ? _mpApps[idx] : STATIC_MARKET[idx];
   if (!app) return;
   openMarketAppObj(app);
 };
@@ -425,19 +397,20 @@ function openMarketAppObj(app) {
   var modal = document.getElementById('marketModal');
   var frame = document.getElementById('mktFrame');
   var title = document.getElementById('mktTitle');
-  var price = document.getElementById('mktPrice');
+  var priceEl = document.getElementById('mktPrice');
+  if (!modal) return;
+  // Même présentation plein écran que marketplace.html
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  if (title) title.textContent = app.name || 'Application';
-  if (price) price.textContent = app.price ? app.price + ' DT' : (app.demoPrice || '');
-  if (frame) frame.src = app.demoUrl || app.url || '';
+  if (title)   title.textContent  = app.name || 'Application';
+  if (priceEl) priceEl.textContent = (app.price ? app.price : (app.payPrice || '')) + (app.price ? ' DT' : '');
+  if (frame)   frame.src = app.demoUrl || app.url || '';
   window._curMpApp = app;
-  if (window.WalaupSound) WalaupSound.click();
 }
 
 window.closeMarketModal = function() {
   var modal = document.getElementById('marketModal');
-  modal.style.display = 'none';
+  if (modal) modal.style.display = 'none';
   document.body.style.overflow = '';
   var frame = document.getElementById('mktFrame');
   if (frame) frame.src = '';
@@ -447,14 +420,12 @@ window.buyMarketApp = function() {
   closeMarketModal();
   var contact = document.getElementById('contact');
   if (contact) contact.scrollIntoView({ behavior: 'smooth' });
-  if (window.WalaupSound) WalaupSound.success();
 };
 
 /* ── PACKS ── */
 window.choosePack = function(pack) {
   sessionStorage.setItem('bz_pack', pack);
   goEstimateur();
-  if (window.WalaupSound) WalaupSound.tab();
 };
 
 /* ── AUTH ── */
@@ -481,7 +452,6 @@ window.choosePack = function(pack) {
     var panel = d('cta' + tab.charAt(0).toUpperCase() + tab.slice(1));
     if (panel) panel.classList.add('on');
     ctaClear();
-    if (window.WalaupSound) WalaupSound.click();
   };
 
   window.ctaGoogle = async function() {
