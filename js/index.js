@@ -1,7 +1,288 @@
 /* ════════════════════════════════════════════════════════
-   Walaup — index.js  (Session 12 — Year 3000 Redesign)
-   Space Grotesk + counters animés + marketplace preview
+   Walaup — index.js  (Session 12 — Hero IA + Sounds)
 ════════════════════════════════════════════════════════ */
+
+/* ── GLOBAL SOUND SYSTEM (hover + clic) ── */
+function initGlobalSounds() {
+  var hoverTargets = 'button, .ai-chip, .nav-login-btn, .footer-mp-btn, .mp-card';
+  document.querySelectorAll(hoverTargets).forEach(function(el) {
+    if (el._sndBound) return;
+    el._sndBound = true;
+    el.addEventListener('mouseenter', function() {
+      if (window.WalaupSound) WalaupSound.click();
+    });
+    el.addEventListener('click', function() {
+      if (window.WalaupSound) WalaupSound.tab();
+    });
+  });
+  // CTA principal : son plus marqué au clic
+  document.querySelectorAll('.btn-p, .nav-cta, .ai-gen-btn, .pack-btn.main, .pack-btn.fire, .arme-btn').forEach(function(el) {
+    if (el._sndMainBound) return;
+    el._sndMainBound = true;
+    el.addEventListener('mouseenter', function() {
+      if (window.WalaupSound) WalaupSound.click();
+    });
+    el.addEventListener('click', function() {
+      if (window.WalaupSound) WalaupSound.send();
+    });
+  });
+}
+
+/* ── TYPEWRITER ── */
+var AI_PROMPTS = [
+  'Une app caisse pour mon café à Tunis...',
+  'Gérer le stock de mon magasin en temps réel...',
+  'Suivre les dettes de mes clients grossistes...',
+  'App de livraison avec suivi des livreurs...',
+  'Gestion de ma crèche et des présences...',
+  'Boutique en ligne pour vendre mes produits...',
+  'App de commandes pour mon restaurant...'
+];
+
+var _twIdx    = 0;
+var _twPos    = 0;
+var _twDir    = 1;  // 1=typing, -1=deleting
+var _twTimer  = null;
+var _twPaused = false;
+
+function _twStep() {
+  if (_twPaused) return;
+  var el  = document.getElementById('aiTyped');
+  var box = document.getElementById('aiBox');
+  if (!el) return;
+  var prompt = AI_PROMPTS[_twIdx];
+
+  if (_twDir === 1) {
+    _twPos++;
+    el.textContent = prompt.slice(0, _twPos);
+    if (_twPos >= prompt.length) {
+      _twDir = -1;
+      _twTimer = setTimeout(_twStep, 2200); // pause before deleting
+      return;
+    }
+    _twTimer = setTimeout(_twStep, 42);
+  } else {
+    _twPos--;
+    el.textContent = prompt.slice(0, _twPos);
+    if (_twPos <= 0) {
+      _twDir = 1;
+      _twIdx = (_twIdx + 1) % AI_PROMPTS.length;
+      _twTimer = setTimeout(_twStep, 320);
+      return;
+    }
+    _twTimer = setTimeout(_twStep, 22);
+  }
+}
+
+function startTypewriter() {
+  clearTimeout(_twTimer);
+  _twPaused = false;
+  _twTimer = setTimeout(_twStep, 700);
+}
+
+function stopTypewriter() {
+  _twPaused = true;
+  clearTimeout(_twTimer);
+}
+
+/* ── APP TEMPLATES (selon mot-clé) ── */
+var APP_TEMPLATES = {
+  café: {
+    name:'App Café Bel Manba',
+    cardLbl:'Ventes du jour', amt:'3 240 DT', trd:'+22% vs hier',
+    s1n:'184', s1l:'Commandes', s2l:'En ligne',
+    genTitle:'App Café…', bg:'linear-gradient(135deg,#6c8fff,#b07cff)'
+  },
+  stock: {
+    name:'App Stock Manager',
+    cardLbl:'Articles en stock', amt:'1 847 unités', trd:'≥ seuil minimum',
+    s1n:'47', s1l:'Références', s2l:'Alertes OFF',
+    genTitle:'App Stock…', bg:'linear-gradient(135deg,#34d399,#059669)'
+  },
+  livraison: {
+    name:'App Livraison Pro',
+    cardLbl:'Livraisons du jour', amt:'38 courses', trd:'+5 en cours',
+    s1n:'12', s1l:'Livreurs', s2l:'Tous actifs',
+    genTitle:'App Livraison…', bg:'linear-gradient(135deg,#6c8fff,#22d3ee)'
+  },
+  dettes: {
+    name:'App Dettes & Créances',
+    cardLbl:'Total créances', amt:'12 450 DT', trd:'3 relances en attente',
+    s1n:'28', s1l:'Clients', s2l:'À relancer',
+    genTitle:'App Dettes…', bg:'linear-gradient(135deg,#b07cff,#6c8fff)'
+  },
+  default: {
+    name:'Mon App Business',
+    cardLbl:'Chiffre du jour', amt:'2 847 DT', trd:'+18% vs hier',
+    s1n:'142', s1l:'Transactions', s2l:'En ligne',
+    genTitle:'App Business…', bg:'linear-gradient(135deg,#6c8fff,#b07cff)'
+  }
+};
+
+/* ── DETECT KEYWORD ── */
+function detectKeyword(text) {
+  var t = text.toLowerCase();
+  if (/caf[eé]|restaurant|snack|bar|th[eé]/.test(t))      return 'café';
+  if (/stock|magasin|inventaire|entrée|sortie|maga/.test(t)) return 'stock';
+  if (/livrai|livreur|course|moto|transport/.test(t))        return 'livraison';
+  if (/dette|cr[eé]ance|impay|client|rembours/.test(t))      return 'dettes';
+  return 'default';
+}
+
+/* ── GENERATE ANIMATION ── */
+var _generating = false;
+var _currentKeyword = 'default';
+
+window.generateApp = function() {
+  if (_generating) return;
+  _generating = true;
+  stopTypewriter();
+
+  var typed   = document.getElementById('aiTyped');
+  var keyword = typed ? detectKeyword(typed.textContent) : 'default';
+  _currentKeyword = keyword;
+  var tpl = APP_TEMPLATES[keyword] || APP_TEMPLATES.default;
+
+  // Button loading
+  var btn   = document.getElementById('aiGenBtn');
+  var lbl   = document.getElementById('aiGenLabel');
+  var icon  = document.getElementById('aiGenIcon');
+  if (btn)  btn.classList.add('loading');
+  if (lbl)  lbl.textContent = 'Génération…';
+  if (icon) { icon.className = 'ph-bold ph-circle-notch spin'; }
+
+  // Sound
+  if (window.WalaupSound) WalaupSound.send();
+
+  // Switch phone to generating state
+  var scene = document.querySelector('.phone-scene');
+  var idle  = document.getElementById('phoneIdle');
+  var gen   = document.getElementById('phoneGenerating');
+  var done  = document.getElementById('phoneDone');
+
+  if (idle) idle.style.display = 'none';
+  if (done) done.style.display = 'none';
+  if (gen)  gen.style.display  = 'flex';
+  if (scene) { scene.classList.remove('done'); scene.classList.add('generating'); }
+
+  // Progress animation
+  var bar  = document.getElementById('pgenBar');
+  var pct  = document.getElementById('pgenPct');
+  var title = document.getElementById('pgenTitle');
+  var tasks = [document.getElementById('pt1'), document.getElementById('pt2'), document.getElementById('pt3'), document.getElementById('pt4')];
+
+  if (title) title.textContent = tpl.genTitle;
+
+  var progress = 0;
+  var prog = setInterval(function() {
+    progress += Math.random() * 8 + 3;
+    if (progress > 100) progress = 100;
+    if (bar) bar.style.width = progress + '%';
+    if (pct) pct.textContent = Math.round(progress) + '%';
+    // Check tasks
+    if (progress > 22  && tasks[0]) { tasks[0].classList.add('done'); tasks[0].querySelector('i').className = 'ph-bold ph-check-circle'; }
+    if (progress > 44  && tasks[1]) { tasks[1].classList.add('done'); tasks[1].querySelector('i').className = 'ph-bold ph-check-circle'; }
+    if (progress > 66  && tasks[2]) { tasks[2].classList.add('done'); tasks[2].querySelector('i').className = 'ph-bold ph-check-circle'; }
+    if (progress > 88  && tasks[3]) { tasks[3].classList.add('done'); tasks[3].querySelector('i').className = 'ph-bold ph-check-circle'; }
+    if (progress >= 100) clearInterval(prog);
+  }, 80);
+
+  // After 3s: show result
+  setTimeout(function() {
+    clearInterval(prog);
+    if (bar) bar.style.width = '100%';
+    if (pct) pct.textContent = '100%';
+
+    // Populate done screen
+    var el = function(id) { return document.getElementById(id); };
+    if (el('pdoneLabel'))  el('pdoneLabel').textContent  = 'App générée !';
+    if (el('pdoneAppName')) el('pdoneAppName').textContent = tpl.name;
+    if (el('pdoneCardLbl')) el('pdoneCardLbl').textContent = tpl.cardLbl;
+    if (el('pdoneAmt'))    el('pdoneAmt').textContent    = tpl.amt;
+    if (el('pdoneTrd'))    el('pdoneTrd').innerHTML      = '<i class="ph-bold ph-trend-up" style="font-size:.65rem;margin-right:3px"></i>' + tpl.trd;
+    if (el('pdoneS1n'))   el('pdoneS1n').textContent    = tpl.s1n;
+    if (el('pdoneS1l'))   el('pdoneS1l').textContent    = tpl.s1l;
+    if (el('pdoneS2l'))   el('pdoneS2l').textContent    = tpl.s2l;
+    if (el('pdoneCard'))  el('pdoneCard').style.background = tpl.bg;
+
+    // Reset tasks icons for next run
+    tasks.forEach(function(t) {
+      if (t) { t.classList.remove('done'); t.querySelector('i').className = 'ph-bold ph-circle'; }
+    });
+
+    // Transition
+    if (gen)  gen.style.display  = 'none';
+    if (done) done.style.display = 'flex';
+    if (scene) { scene.classList.remove('generating'); scene.classList.add('done'); }
+
+    if (window.WalaupSound) WalaupSound.success();
+
+    // Reset button
+    if (btn)  btn.classList.remove('loading');
+    if (lbl)  lbl.textContent = 'Régénérer';
+    if (icon) icon.className = 'ph-bold ph-rocket-launch';
+    _generating = false;
+
+    // Auto reset after 7s
+    setTimeout(function() {
+      resetPhone();
+    }, 7000);
+
+  }, 3000);
+};
+
+/* ── CHIP TRIGGER ── */
+window.triggerChip = function(keyword) {
+  if (_generating) return;
+  var typed = document.getElementById('aiTyped');
+  var tpl   = APP_TEMPLATES[keyword] || APP_TEMPLATES.default;
+  // Find matching prompt
+  var map = { café:'Une app caisse pour mon café à Tunis...', stock:'Gérer le stock de mon magasin en temps réel...', livraison:'App de livraison avec suivi des livreurs...', dettes:'Suivre les dettes de mes clients grossistes...' };
+  if (typed) typed.textContent = map[keyword] || '';
+  // Mark chip active
+  document.querySelectorAll('.ai-chip').forEach(function(c) { c.classList.remove('active'); });
+  event.currentTarget.classList.add('active');
+  stopTypewriter();
+  if (window.WalaupSound) WalaupSound.click();
+  setTimeout(function() { generateApp(); }, 300);
+};
+
+/* ── RESET PHONE ── */
+function resetPhone() {
+  var scene = document.querySelector('.phone-scene');
+  var idle  = document.getElementById('phoneIdle');
+  var gen   = document.getElementById('phoneGenerating');
+  var done  = document.getElementById('phoneDone');
+  var bar   = document.getElementById('pgenBar');
+  var pct   = document.getElementById('pgenPct');
+  var btn   = document.getElementById('aiGenBtn');
+  var lbl   = document.getElementById('aiGenLabel');
+  var icon  = document.getElementById('aiGenIcon');
+
+  if (gen)  gen.style.display  = 'none';
+  if (done) done.style.display = 'none';
+  if (idle) idle.style.display = 'block';
+  if (bar)  bar.style.width    = '0%';
+  if (pct)  pct.textContent    = '0%';
+  if (scene) { scene.classList.remove('generating','done'); }
+  if (btn)  btn.classList.remove('loading');
+  if (lbl)  lbl.textContent = 'Générer';
+  if (icon) icon.className  = 'ph-bold ph-rocket-launch';
+  document.querySelectorAll('.ai-chip').forEach(function(c) { c.classList.remove('active'); });
+  var typed = document.getElementById('aiTyped');
+  if (typed) typed.textContent = '';
+  _generating = false;
+  startTypewriter();
+}
+
+/* ── BOOT ── */
+document.addEventListener('DOMContentLoaded', function() {
+  startTypewriter();
+  // Init sounds après chargement du DOM
+  setTimeout(initGlobalSounds, 400);
+  // Re-init sounds après révélation des cartes dynamiques marketplace
+  setTimeout(initGlobalSounds, 2000);
+});
 
 /* ── i18n — Traductions FR / AR ── */
 var T = {
@@ -9,7 +290,7 @@ fr: {
   nw:'Pourquoi nous', ns:'Solutions', nh:'Comment ça marche', nt:'Avis clients',
   nc:'Créer mon app',
   nlog:'Se connecter',
-  hb:'Walaup — Custom Apps Studio',
+  hb:'Décrivez. On construit. En 48h.',
   h1:'On transforme', h2:'votre business', h3:'en <span class="grad">application</span>',
   hs:'Automatisez votre business, gagnez du temps et éliminez les erreurs — app 100% sur mesure, livrée en quelques jours.',
   hc1:'Créer ma démo gratuite', hc2:'Voir les exemples',
@@ -620,4 +901,6 @@ window.HiveSound = window.WalaupSound || {};
 // Load marketplace preview from Firestore
 document.addEventListener('DOMContentLoaded', function() {
   loadMarketplacePreview();
+  // Re-init sounds after marketplace cards render
+  setTimeout(initGlobalSounds, 3000);
 });
