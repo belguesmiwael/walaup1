@@ -4,31 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Walaup — Applications sur mesure pour votre business</title>
-<!-- Remplacer l'ancienne ligne favicon par : -->
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="manifest" href="manifest-client.json">
+<meta name="theme-color" content="#04040f">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/effects.css">
 <link rel="stylesheet" href="css/index.css">
-<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-
-<style>
-/* === BRAND WORDMARK === */
-.brand-wordmark {
-  font-family: 'Outfit', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: rgba(234, 231, 231, 0.8);
-  text-decoration: none;
-  line-height: 1;
-  transition: color 0.2s ease;
-}
-.brand-wordmark:hover { color: rgba(234, 231, 231, 1); }
-.brand-wordmark--sm { font-size: 1rem; font-weight: 700; }
-</style>
 </head>
 <body>
 
@@ -55,20 +40,27 @@
   </ul>
   <div class="nav-r">
     <button class="lang-btn" id="langBtn" onclick="toggleLang()">عربي</button>
-    <a href="marketplace.html" class="nav-mp-icon" title="Marketplace — Applications partenaires">
+    <a href="marketplace.html" class="nav-mp-icon" title="Marketplace">
       <i class="ph-bold ph-storefront"></i>
     </a>
-    <button class="nav-cta" onclick="goEstimateur()"><i class="ph-bold ph-rocket-launch"></i> <span data-k="nc">Créer mon app →</span></button>
+    <a href="#contact" class="nav-login-btn" onclick="scrollToAuth(event)">
+      <i class="ph-bold ph-sign-in"></i>
+      <span data-k="nlog">Se connecter</span>
+    </a>
+    <button class="nav-cta" onclick="goEstimateur()">
+      <i class="ph-bold ph-rocket-launch"></i>
+      <span data-k="nc">Créer mon app</span>
+    </button>
   </div>
 </nav>
 
 <!-- HERO -->
 <section id="hero">
   <div class="hero-wrap">
-    <div>
-      <div class="h-tag r" data-k="hb">
+    <div class="hero-left">
+      <div class="h-tag r">
         <div class="pulse"></div>
-        <img src="icons/logo-icon.svg" alt="" width="16" height="16" style="vertical-align:middle;margin-right:4px;opacity:.85"> Walaup — Custom Apps Studio</span>
+        <span data-k="hb">Walaup — Custom Apps Studio</span>
       </div>
       <h1 class="h-title r2">
         <span data-k="h1">On transforme</span><br>
@@ -77,8 +69,14 @@
       </h1>
       <p class="h-sub r3" data-k="hs">Automatisez votre business, gagnez du temps et éliminez les erreurs — app 100% sur mesure, livrée en quelques jours.</p>
       <div class="h-btns r4">
-        <button class="btn-p" onclick="goEstimateur()"><span data-k="hc1">Créer ma démo gratuite</span><span class="arr">→</span></button>
-        <button class="btn-o" onclick="document.getElementById('solutions').scrollIntoView({behavior:'smooth'})"><span data-k="hc2"><i class="ph-bold ph-play-circle"></i> Voir les exemples</span></button>
+        <button class="btn-p" onclick="goEstimateur()">
+          <span data-k="hc1">Créer ma démo gratuite</span>
+          <span class="arr"><i class="ph-bold ph-arrow-right"></i></span>
+        </button>
+        <button class="btn-o" onclick="document.getElementById('solutions').scrollIntoView({behavior:'smooth'})">
+          <i class="ph-bold ph-play-circle"></i>
+          <span data-k="hc2">Voir les exemples</span>
+        </button>
       </div>
       <div class="h-proof r5">
         <div class="avs">
@@ -100,11 +98,11 @@
             <div class="pcard">
               <div class="plbl">Ventes du jour</div>
               <div class="pamt">2 847 DT</div>
-              <div class="ptrd">↑ +18% vs hier</div>
+              <div class="ptrd"><i class="ph-bold ph-trend-up" style="font-size:.65rem;margin-right:3px"></i>+18% vs hier</div>
             </div>
             <div class="pgrid">
               <div class="pstat"><div class="psn">142</div><div class="psl">Transactions</div></div>
-              <div class="pstat"><div class="psn" style="color:var(--ac2)"><i class="ph-bold ph-number-circle-three"></i></div><div class="psl">Alertes</div></div>
+              <div class="pstat"><div class="psn" style="color:var(--ac2)"><i class="ph-bold ph-bell-ringing" style="font-size:.85rem"></i></div><div class="psl">Alertes</div></div>
             </div>
             <div class="pbars">
               <div class="pbl">7 derniers jours</div>
@@ -120,13 +118,37 @@
 <!-- STATS BAR -->
 <div class="stats-bar">
   <div class="stats-bar-inner">
-    <div class="stat-pill r"><span class="stat-num">50+</span><span class="stat-lbl">Clients satisfaits</span></div>
+    <div class="stat-pill r">
+      <div class="stat-icon"><i class="ph-bold ph-users"></i></div>
+      <div>
+        <span class="stat-num" data-count="50" data-suffix="+">50+</span>
+        <span class="stat-lbl" data-k="sb1">Clients satisfaits</span>
+      </div>
+    </div>
     <div class="stat-sep"></div>
-    <div class="stat-pill r2"><span class="stat-num">48h</span><span class="stat-lbl">Délai livraison démo</span></div>
+    <div class="stat-pill r2">
+      <div class="stat-icon"><i class="ph-bold ph-lightning"></i></div>
+      <div>
+        <span class="stat-num stat-num--ac" data-count="48" data-suffix="h">48h</span>
+        <span class="stat-lbl" data-k="sb2">Délai livraison démo</span>
+      </div>
+    </div>
     <div class="stat-sep"></div>
-    <div class="stat-pill r3"><span class="stat-num">100%</span><span class="stat-lbl">Made in Tunisia 🇹🇳</span></div>
+    <div class="stat-pill r3">
+      <div class="stat-icon"><i class="ph-bold ph-map-pin"></i></div>
+      <div>
+        <span class="stat-num" data-count="100" data-suffix="%">100%</span>
+        <span class="stat-lbl">Made in Tunisia 🇹🇳</span>
+      </div>
+    </div>
     <div class="stat-sep"></div>
-    <div class="stat-pill r4"><span class="stat-num" style="color:var(--ac)">0 DT</span><span class="stat-lbl">avant validation</span></div>
+    <div class="stat-pill r4">
+      <div class="stat-icon"><i class="ph-bold ph-shield-check"></i></div>
+      <div>
+        <span class="stat-num stat-num--ac" data-count="0" data-suffix=" DT">0 DT</span>
+        <span class="stat-lbl" data-k="sb4">avant validation</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -139,12 +161,36 @@
       <p class="ssub r3" data-k="ps">Si vous avez répondu oui à l'un de ces problèmes, on a la solution.</p>
     </div>
     <div class="pgrd">
-      <div class="pc g r"><div class="pic">📄</div><h3 data-k="p1t">Trop de papier</h3><p data-k="p1d">Factures à la main, registres d'erreurs qui vous font perdre des heures.</p></div>
-      <div class="pc g r2"><div class="pic">📦</div><h3 data-k="p2t">Stock incontrôlable</h3><p data-k="p2d">Vous ne savez jamais exactement ce qu'il reste en stock.</p></div>
-      <div class="pc g r3"><div class="pic">💸</div><h3 data-k="p3t">Pertes invisibles</h3><p data-k="p3d">Erreurs de caisse, vols discrets — l'argent disparaît chaque mois.</p></div>
-      <div class="pc g r4"><div class="pic">⏰</div><h3 data-k="p4t">Clients impayés</h3><p data-k="p4d">Dettes non suivies. Votre trésorerie en souffre.</p></div>
-      <div class="pc g r5"><div class="pic">👥</div><h3 data-k="p5t">Employés non suivis</h3><p data-k="p5d">Présences, paiements — tout est dans votre tête.</p></div>
-      <div class="pc g r6"><div class="pic">📊</div><h3 data-k="p6t">Aucune visibilité</h3><p data-k="p6d">Vous ne savez pas si votre business est vraiment rentable.</p></div>
+      <div class="pc g r">
+        <div class="pic"><i class="ph-bold ph-files"></i></div>
+        <h3 data-k="p1t">Trop de papier</h3>
+        <p data-k="p1d">Factures à la main, registres d'erreurs qui vous font perdre des heures.</p>
+      </div>
+      <div class="pc g r2">
+        <div class="pic"><i class="ph-bold ph-package"></i></div>
+        <h3 data-k="p2t">Stock incontrôlable</h3>
+        <p data-k="p2d">Vous ne savez jamais exactement ce qu'il reste en stock.</p>
+      </div>
+      <div class="pc g r3">
+        <div class="pic"><i class="ph-bold ph-trend-down"></i></div>
+        <h3 data-k="p3t">Pertes invisibles</h3>
+        <p data-k="p3d">Erreurs de caisse, vols discrets — l'argent disparaît chaque mois.</p>
+      </div>
+      <div class="pc g r4">
+        <div class="pic"><i class="ph-bold ph-clock-countdown"></i></div>
+        <h3 data-k="p4t">Clients impayés</h3>
+        <p data-k="p4d">Dettes non suivies. Votre trésorerie en souffre.</p>
+      </div>
+      <div class="pc g r5">
+        <div class="pic"><i class="ph-bold ph-users-three"></i></div>
+        <h3 data-k="p5t">Employés non suivis</h3>
+        <p data-k="p5d">Présences, paiements — tout est dans votre tête.</p>
+      </div>
+      <div class="pc g r6">
+        <div class="pic"><i class="ph-bold ph-chart-line-up"></i></div>
+        <h3 data-k="p6t">Aucune visibilité</h3>
+        <p data-k="p6d">Vous ne savez pas si votre business est vraiment rentable.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -161,15 +207,42 @@
           à votre business
         </h2>
         <p class="ssub r3" data-k="ssu">Pas un template générique. Construite uniquement pour vous — disponible sur téléphone.</p>
-        <button class="btn-p r4" style="margin-top:30px" onclick="goEstimateur()"><span data-k="scta">Je veux mon app →</span></button>
+        <button class="btn-p r4" style="margin-top:30px" onclick="goEstimateur()">
+          <span data-k="scta">Je veux mon app</span>
+          <i class="ph-bold ph-arrow-right"></i>
+        </button>
       </div>
       <div class="amosaic">
-        <div class="atile g r"><div class="ae">☕</div><h4 data-k="a1t">App Café</h4><p data-k="a1d">Caisse anti-vol, commandes, employés</p></div>
-        <div class="atile g r2"><div class="ae">📦</div><h4 data-k="a2t">App Stock</h4><p data-k="a2d">Entrées/sorties, alertes auto</p></div>
-        <div class="atile g r3"><div class="ae">💰</div><h4 data-k="a3t">App Dettes</h4><p data-k="a3d">Clients débiteurs, relances</p></div>
-        <div class="atile g r4"><div class="ae">🏫</div><h4 data-k="a4t">App Crèche</h4><p data-k="a4d">Inscriptions, présences, parents</p></div>
-        <div class="atile g r5"><div class="ae">🛵</div><h4 data-k="a5t">App Livraison</h4><p data-k="a5d">Commandes, livreurs, suivi réel</p></div>
-        <div class="atile g r6"><div class="ae">🛒</div><h4 data-k="a6t">E-commerce TN</h4><p data-k="a6d">Boutique en ligne clé en main</p></div>
+        <div class="atile g r">
+          <div class="ae"><i class="ph-bold ph-coffee"></i></div>
+          <h4 data-k="a1t">App Café</h4>
+          <p data-k="a1d">Caisse anti-vol, commandes, employés</p>
+        </div>
+        <div class="atile g r2">
+          <div class="ae"><i class="ph-bold ph-package"></i></div>
+          <h4 data-k="a2t">App Stock</h4>
+          <p data-k="a2d">Entrées/sorties, alertes auto</p>
+        </div>
+        <div class="atile g r3">
+          <div class="ae"><i class="ph-bold ph-money"></i></div>
+          <h4 data-k="a3t">App Dettes</h4>
+          <p data-k="a3d">Clients débiteurs, relances</p>
+        </div>
+        <div class="atile g r4">
+          <div class="ae"><i class="ph-bold ph-baby"></i></div>
+          <h4 data-k="a4t">App Crèche</h4>
+          <p data-k="a4d">Inscriptions, présences, parents</p>
+        </div>
+        <div class="atile g r5">
+          <div class="ae"><i class="ph-bold ph-motorcycle"></i></div>
+          <h4 data-k="a5t">App Livraison</h4>
+          <p data-k="a5d">Commandes, livreurs, suivi réel</p>
+        </div>
+        <div class="atile g r6">
+          <div class="ae"><i class="ph-bold ph-shopping-cart-simple"></i></div>
+          <h4 data-k="a6t">E-commerce TN</h4>
+          <p data-k="a6d">Boutique en ligne clé en main</p>
+        </div>
       </div>
     </div>
   </div>
@@ -183,11 +256,26 @@
     <p class="ssub r3" data-k="hws">5 étapes claires, sans surprise, sans paiement avant validation.</p>
     <div class="tl" id="tl">
       <div class="tl-line"><div class="tl-prog" id="tlp"></div></div>
-      <div class="tls r"><div class="tln"><i class="ph-bold ph-number-circle-one"></i></div><div><h4 data-k="s1t">Vous décrivez</h4><p data-k="s1d">Remplissez le formulaire.</p></div></div>
-      <div class="tls r2"><div class="tln"><i class="ph-bold ph-number-circle-two"></i></div><div><h4 data-k="s2t">On crée la démo</h4><p data-k="s2d">En 48h, prototype complet.</p></div></div>
-      <div class="tls r3"><div class="tln">3</div><div><h4 data-k="s3t">Vous validez</h4><p data-k="s3d">Modifications illimitées.</p></div></div>
-      <div class="tls r4"><div class="tln">4</div><div><h4 data-k="s4t">Paiement</h4><p data-k="s4d">Après validation seulement.</p></div></div>
-      <div class="tls r5"><div class="tln">5</div><div><h4 data-k="s5t">Livraison</h4><p data-k="s5d">App déployée + support.</p></div></div>
+      <div class="tls r">
+        <div class="tln"><i class="ph-bold ph-number-circle-one"></i></div>
+        <div><h4 data-k="s1t">Vous décrivez</h4><p data-k="s1d">Remplissez le formulaire.</p></div>
+      </div>
+      <div class="tls r2">
+        <div class="tln"><i class="ph-bold ph-number-circle-two"></i></div>
+        <div><h4 data-k="s2t">On crée la démo</h4><p data-k="s2d">En 48h, prototype complet.</p></div>
+      </div>
+      <div class="tls r3">
+        <div class="tln"><i class="ph-bold ph-number-circle-three"></i></div>
+        <div><h4 data-k="s3t">Vous validez</h4><p data-k="s3d">Modifications illimitées.</p></div>
+      </div>
+      <div class="tls r4">
+        <div class="tln"><i class="ph-bold ph-number-circle-four"></i></div>
+        <div><h4 data-k="s4t">Paiement</h4><p data-k="s4d">Après validation seulement.</p></div>
+      </div>
+      <div class="tls r5">
+        <div class="tln"><i class="ph-bold ph-number-circle-five"></i></div>
+        <div><h4 data-k="s5t">Livraison</h4><p data-k="s5d">App déployée + support.</p></div>
+      </div>
     </div>
   </div>
 </section>
@@ -200,18 +288,32 @@
         <div class="slbl r" data-k="avl">Pourquoi nous</div>
         <h2 class="stitle r2" data-k="avt">Ce qui nous rend<br>différents</h2>
         <div class="avlist">
-          <div class="avi g r"><div class="avic" style="background:rgba(108,143,255,.15)">📱</div><div><h4 data-k="av1t">Disponible sur téléphone</h4><p data-k="av1d">Mobile, tablette et PC. Accessible partout, 24h/24.</p></div></div>
-          <div class="avi g r2"><div class="avic" style="background:rgba(176,124,255,.15)">🎯</div><div><h4 data-k="av2t">100% sur mesure</h4><p data-k="av2d">Aucun template. Chaque écran conçu pour votre activité.</p></div></div>
-          <div class="avi g r3"><div class="avic" style="background:rgba(108,143,255,.15)">🌍</div><div><h4 data-k="av3t">Support local en arabe</h4><p data-k="av3d">On est en Tunisie, on parle votre langue.</p></div></div>
-          <div class="avi g r4"><div class="avic" style="background:rgba(176,124,255,.15)">⚡</div><div><h4 data-k="av4t">Simple à utiliser</h4><p data-k="av4d">Si vous savez WhatsApp, vous savez utiliser notre app.</p></div></div>
+          <div class="avi g r">
+            <div class="avic" style="background:rgba(108,143,255,.15);color:var(--ac)"><i class="ph-bold ph-device-mobile"></i></div>
+            <div><h4 data-k="av1t">Disponible sur téléphone</h4><p data-k="av1d">Mobile, tablette et PC. Accessible partout, 24h/24.</p></div>
+          </div>
+          <div class="avi g r2">
+            <div class="avic" style="background:rgba(176,124,255,.15);color:var(--ac2)"><i class="ph-bold ph-sliders"></i></div>
+            <div><h4 data-k="av2t">100% sur mesure</h4><p data-k="av2d">Aucun template. Chaque écran conçu pour votre activité.</p></div>
+          </div>
+          <div class="avi g r3">
+            <div class="avic" style="background:rgba(108,143,255,.15);color:var(--ac)"><i class="ph-bold ph-headset"></i></div>
+            <div><h4 data-k="av3t">Support local en arabe</h4><p data-k="av3d">On est en Tunisie, on parle votre langue.</p></div>
+          </div>
+          <div class="avi g r4">
+            <div class="avic" style="background:rgba(176,124,255,.15);color:var(--ac2)"><i class="ph-bold ph-lightning"></i></div>
+            <div><h4 data-k="av4t">Simple à utiliser</h4><p data-k="av4d">Si vous savez WhatsApp, vous savez utiliser notre app.</p></div>
+          </div>
         </div>
       </div>
       <div class="arme g2 r">
-        <span class="arme-ico">🎁</span>
+        <div class="arme-ico-wrap">
+          <i class="ph-bold ph-gift arme-ico"></i>
+        </div>
         <h3 data-k="armt">Démo 100% Gratuite</h3>
         <p data-k="armd">Avant de payer un seul dinar, vous voyez votre application fonctionner en vrai. Notre engagement unique.</p>
         <p style="margin-top:12px;font-size:.8rem;color:var(--mu)" data-k="armn">Personne d'autre ne propose ça en Tunisie.</p>
-        <button class="arme-btn" onclick="goEstimateur()" data-k="armb">Je veux ma démo gratuite →</button>
+        <button class="arme-btn" onclick="goEstimateur()" data-k="armb">Je veux ma démo gratuite <i class="ph-bold ph-arrow-right"></i></button>
       </div>
     </div>
   </div>
@@ -225,193 +327,233 @@
     <p class="ssub r3" data-k="tes">De vraies entreprises tunisiennes, de vrais résultats.</p>
     <div class="tgrd">
       <div class="tc g r">
-        <div class="qi">"</div><div class="stars">★★★★★</div>
+        <div class="stars-row">
+          <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+        </div>
         <p data-k="t1q">"Avant 3 cahiers pour mon café. Maintenant tout dans mon téléphone. Les vols à la caisse, éliminés."</p>
-        <div class="ta"><div class="tav" style="background:linear-gradient(135deg,#6c8fff,#b07cff);color:#fff">K</div><div><div class="tn">Karim B.</div><div class="tr" data-k="t1r">Propriétaire café — Tunis</div></div></div>
+        <div class="ta">
+          <div class="tav" style="background:linear-gradient(135deg,#6c8fff,#b07cff);color:#fff">K</div>
+          <div><div class="tn">Karim B.</div><div class="tr" data-k="t1r">Propriétaire café — Tunis</div></div>
+        </div>
       </div>
       <div class="tc g r2">
-        <div class="qi">"</div><div class="stars">★★★★★</div>
+        <div class="stars-row">
+          <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+        </div>
         <p data-k="t2q">"J'ai récupéré 4000 DT en un mois grâce au suivi automatique des dettes."</p>
-        <div class="ta"><div class="tav" style="background:linear-gradient(135deg,#b07cff,#ff7eb3);color:#fff">S</div><div><div class="tn">Sonia M.</div><div class="tr" data-k="t2r">Grossiste — Sfax</div></div></div>
+        <div class="ta">
+          <div class="tav" style="background:linear-gradient(135deg,#b07cff,#ff7eb3);color:#fff">S</div>
+          <div><div class="tn">Sonia M.</div><div class="tr" data-k="t2r">Grossiste — Sfax</div></div>
+        </div>
       </div>
       <div class="tc g r3">
-        <div class="qi">"</div><div class="stars">★★★★★</div>
+        <div class="stars-row">
+          <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+        </div>
         <p data-k="t3q">"La démo gratuite m'a convaincu en 5 min. Je suis tout depuis mon salon."</p>
-        <div class="ta"><div class="tav" style="background:linear-gradient(135deg,#34d399,#6c8fff);color:#fff">A</div><div><div class="tn">Ahmed T.</div><div class="tr" data-k="t3r">Service livraison — Sousse</div></div></div>
+        <div class="ta">
+          <div class="tav" style="background:linear-gradient(135deg,#34d399,#6c8fff);color:#fff">A</div>
+          <div><div class="tn">Ahmed T.</div><div class="tr" data-k="t3r">Service livraison — Sousse</div></div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- APP GALLERY -->
+<!-- SCREENSHOTS — Apps en action -->
 <section id="apps">
   <div class="cnt">
     <div class="apps-header">
       <div class="slbl r" data-k="apl">Exemples d'apps</div>
       <h2 class="stitle r2" data-k="apt">Voyez nos apps en action</h2>
-      <p class="ssub r3" data-k="aps">Cliquez sur une app pour la tester en direct — exactement comme vos futurs clients l'utiliseront.</p>
+      <p class="ssub r3" data-k="aps">Des interfaces pensées pour vos équipes — claires, rapides, sur téléphone.</p>
     </div>
-    <div class="apps-grid" id="appsGrid">
 
-      <!-- APP 1 — Café Beb Lmdina -->
-      <div class="app-card g r" onclick="openApp(0)">
-        <div class="ac-mock" style="background:#0F0601">
-          <div style="background:#1A0B03;border-bottom:1px solid rgba(200,134,10,.25);padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
-            <div style="display:flex;align-items:center;gap:7px">
-              <div style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#C8860A,#E8A020);display:flex;align-items:center;justify-content:center;font-size:.65rem">☕</div>
-              <span style="color:#F0DEC8;font-size:.65rem;font-weight:700;font-family:sans-serif">Café Beb Lmdina</span>
-            </div>
-            <div style="font-size:.55rem;color:#C8860A">📅 Auj.</div>
+    <!-- SCREENSHOTS TRACK (desktop: grid 3col, mobile: horizontal scroll) -->
+    <div class="screenshots-track r2">
+      <!-- Screenshot 1 -->
+      <div class="screenshot-card g" onclick="openApp(0)">
+        <div class="sc-img-wrap">
+          <img src="images/screenshot-cafe.jpg" alt="App Café" class="sc-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="sc-fallback" style="display:none;background:linear-gradient(135deg,#1A0B03,#241205)">
+            <i class="ph-bold ph-coffee" style="font-size:3rem;color:#C8860A;opacity:.6"></i>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:8px 10px">
-            <div style="background:#1E0E04;border:1px solid rgba(200,134,10,.2);border-radius:7px;padding:6px;text-align:center"><div style="color:#C8860A;font-size:.75rem;font-weight:800;font-family:sans-serif">324</div><div style="color:#CCA882;font-size:.48rem;margin-top:1px;font-family:sans-serif">Commandes</div></div>
-            <div style="background:#1E0E04;border:1px solid rgba(200,134,10,.2);border-radius:7px;padding:6px;text-align:center"><div style="color:#E8A020;font-size:.75rem;font-weight:800;font-family:sans-serif">2,840</div><div style="color:#CCA882;font-size:.48rem;margin-top:1px;font-family:sans-serif">DT Ventes</div></div>
-            <div style="background:#1E0E04;border:1px solid rgba(200,134,10,.2);border-radius:7px;padding:6px;text-align:center"><div style="color:#38A169;font-size:.75rem;font-weight:800;font-family:sans-serif">+12%</div><div style="color:#CCA882;font-size:.48rem;margin-top:1px;font-family:sans-serif">Vs hier</div></div>
+          <div class="sc-overlay">
+            <button class="sc-play-btn"><i class="ph-bold ph-play"></i> Tester en direct</button>
           </div>
-          <div style="margin:0 10px;background:#1E0E04;border:1px solid rgba(200,134,10,.18);border-radius:8px;overflow:hidden">
-            <div style="background:#241205;padding:6px 10px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(200,134,10,.15)">
-              <span style="color:#C8860A;font-size:.52rem;font-weight:700;font-family:sans-serif">COMMANDES DU JOUR</span>
-              <span style="color:#38A169;font-size:.5rem;font-family:sans-serif">● En direct</span>
-            </div>
-            <div style="padding:5px 10px">
-              <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(200,134,10,.08)"><span style="color:#F0DEC8;font-size:.52rem;font-family:sans-serif">Café crème × 2</span><span style="color:#E8A020;font-size:.52rem;font-family:sans-serif">8.400 DT</span></div>
-              <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(200,134,10,.08)"><span style="color:#F0DEC8;font-size:.52rem;font-family:sans-serif">Thé × 3</span><span style="color:#E8A020;font-size:.52rem;font-family:sans-serif">9.000 DT</span></div>
-              <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:#F0DEC8;font-size:.52rem;font-family:sans-serif">Sandwich × 1</span><span style="color:#E8A020;font-size:.52rem;font-family:sans-serif">7.500 DT</span></div>
-            </div>
-          </div>
-          <div style="position:absolute;bottom:0;left:0;right:0;background:#1A0B03;border-top:1px solid rgba(200,134,10,.2);display:flex;padding:6px 0">
-            <div style="flex:1;text-align:center;font-size:.5rem;color:#C8860A;font-family:sans-serif">🏠 Accueil</div>
-            <div style="flex:1;text-align:center;font-size:.5rem;color:#CCA882;font-family:sans-serif">📋 Commandes</div>
-            <div style="flex:1;text-align:center;font-size:.5rem;color:#CCA882;font-family:sans-serif">💰 Caisse</div>
-            <div style="flex:1;text-align:center;font-size:.5rem;color:#CCA882;font-family:sans-serif">👥 Équipe</div>
+          <div class="sc-badge"><i class="ph-bold ph-circle-wavy-check"></i> Demo live</div>
+        </div>
+        <div class="sc-info">
+          <div class="sc-app-icon" style="background:linear-gradient(135deg,#C8860A,#E8A020)"><i class="ph-bold ph-coffee"></i></div>
+          <div>
+            <div class="sc-name">Café Beb Lmdina</div>
+            <div class="sc-desc" data-k="sc1d">Caisse, commandes, gestion employés</div>
           </div>
         </div>
-        <div class="ac-info"><div class="ac-name">☕ Café Beb Lmdina</div><div class="ac-desc">Caisse, commandes, gestion employés</div></div>
-        <div class="ac-overlay"><div class="ac-play">▶</div><div style="color:#fff;font-size:.78rem;font-weight:600;text-align:center;margin-top:8px">Tester l'app</div></div>
-        <div class="ac-tag">Demo live</div>
       </div>
 
-      <!-- APP 2 — RechargeHub TN -->
-      <div class="app-card g r2" onclick="openApp(1)">
-        <div class="ac-mock" style="background:#0a0f1a">
-          <div style="background:#111827;border-bottom:1px solid #1e2d42;padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
-            <div style="display:flex;align-items:center;gap:7px">
-              <div style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#00c896,#0088ff);display:flex;align-items:center;justify-content:center;font-size:.65rem">🔄</div>
-              <span style="color:#f0f4f8;font-size:.65rem;font-weight:700;font-family:sans-serif">RechargeHub TN</span>
-            </div>
-            <div style="background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.3);border-radius:6px;padding:2px 7px;font-size:.48rem;color:#00c896;font-family:sans-serif">Grossiste</div>
+      <!-- Screenshot 2 -->
+      <div class="screenshot-card g" onclick="openApp(1)">
+        <div class="sc-img-wrap">
+          <img src="images/screenshot-grossiste.jpg" alt="App Grossiste" class="sc-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="sc-fallback" style="display:none;background:linear-gradient(135deg,#061a06,#0a2a0a)">
+            <i class="ph-bold ph-arrows-counter-clockwise" style="font-size:3rem;color:#34d399;opacity:.6"></i>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:8px 10px">
-            <div style="background:#111827;border:1px solid #1e2d42;border-radius:8px;padding:7px 8px"><div style="color:#8fa3b8;font-size:.48rem;font-family:sans-serif;margin-bottom:2px">Ventes aujourd'hui</div><div style="color:#00c896;font-size:.8rem;font-weight:800;font-family:sans-serif">4,280 DT</div></div>
-            <div style="background:#111827;border:1px solid #1e2d42;border-radius:8px;padding:7px 8px"><div style="color:#8fa3b8;font-size:.48rem;font-family:sans-serif;margin-bottom:2px">Clients actifs</div><div style="color:#0088ff;font-size:.8rem;font-weight:800;font-family:sans-serif">38</div></div>
+          <div class="sc-overlay">
+            <button class="sc-play-btn"><i class="ph-bold ph-play"></i> Tester en direct</button>
           </div>
-          <div style="margin:0 10px;background:#111827;border:1px solid #1e2d42;border-radius:8px;padding:8px">
-            <div style="color:#8fa3b8;font-size:.5rem;font-family:sans-serif;margin-bottom:6px">COMMANDES RÉCENTES</div>
-            <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="color:#e2e8f0;font-size:.5rem;font-family:sans-serif">Tunisie Telecom × 50</span><span style="color:#00c896;font-size:.5rem;font-family:sans-serif">245 DT</span></div>
-            <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="color:#e2e8f0;font-size:.5rem;font-family:sans-serif">Ooredoo × 30</span><span style="color:#00c896;font-size:.5rem;font-family:sans-serif">150 DT</span></div>
-            <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:#e2e8f0;font-size:.5rem;font-family:sans-serif">Orange × 20</span><span style="color:#00c896;font-size:.5rem;font-family:sans-serif">100 DT</span></div>
+          <div class="sc-badge"><i class="ph-bold ph-circle-wavy-check"></i> Demo live</div>
+        </div>
+        <div class="sc-info">
+          <div class="sc-app-icon" style="background:linear-gradient(135deg,#34d399,#059669)"><i class="ph-bold ph-arrows-counter-clockwise"></i></div>
+          <div>
+            <div class="sc-name">RechargeHub TN</div>
+            <div class="sc-desc" data-k="sc2d">Stock, crédits clients, grossiste</div>
           </div>
         </div>
-        <div class="ac-info"><div class="ac-name">🔄 RechargeHub TN</div><div class="ac-desc">Stock, crédits clients, grossiste</div></div>
-        <div class="ac-overlay"><div class="ac-play">▶</div><div style="color:#fff;font-size:.78rem;font-weight:600;text-align:center;margin-top:8px">Tester l'app</div></div>
-        <div class="ac-tag">Demo live</div>
       </div>
 
-      <!-- APP 3 — Debt Manager -->
-      <div class="app-card g r3" onclick="openApp(2)">
-        <div class="ac-mock" style="background:#f8f9fb">
-          <div style="background:#fff;border-bottom:1px solid rgba(0,0,0,.08);padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
-            <div style="display:flex;align-items:center;gap:7px">
-              <div style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#E4002B,#FF4757);display:flex;align-items:center;justify-content:center;font-size:.65rem">💰</div>
-              <span style="color:#1a1a2e;font-size:.65rem;font-weight:700;font-family:sans-serif">Debt Manager</span>
-            </div>
-            <div style="background:rgba(228,0,43,.1);border-radius:6px;padding:2px 7px;font-size:.48rem;color:#E4002B;font-family:sans-serif">Pro</div>
+      <!-- Screenshot 3 -->
+      <div class="screenshot-card g" onclick="openApp(2)">
+        <div class="sc-img-wrap">
+          <img src="images/screenshot-dettes.jpg" alt="App Dettes" class="sc-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="sc-fallback" style="display:none;background:linear-gradient(135deg,#0a0618,#160a2a)">
+            <i class="ph-bold ph-money" style="font-size:3rem;color:#b07cff;opacity:.6"></i>
           </div>
-          <div style="padding:8px 10px">
-            <div style="background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:10px;margin-bottom:6px;text-align:center">
-              <div style="color:#9595A8;font-size:.5rem;font-family:sans-serif;margin-bottom:3px">TOTAL DETTES EN COURS</div>
-              <div style="color:#E4002B;font-size:1.1rem;font-weight:800;font-family:sans-serif">12,450 DT</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:5px">
-              <div style="background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:7px;padding:6px 8px;display:flex;justify-content:space-between;align-items:center">
-                <div><div style="color:#1a1a2e;font-size:.55rem;font-weight:700;font-family:sans-serif">Mohamed A.</div><div style="color:#9595A8;font-size:.45rem;font-family:sans-serif">Dernière MAJ il y a 2j</div></div>
-                <div style="color:#E4002B;font-size:.65rem;font-weight:800;font-family:sans-serif">3,200 DT</div>
-              </div>
-              <div style="background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:7px;padding:6px 8px;display:flex;justify-content:space-between;align-items:center">
-                <div><div style="color:#1a1a2e;font-size:.55rem;font-weight:700;font-family:sans-serif">Sami B.</div><div style="color:#9595A8;font-size:.45rem;font-family:sans-serif">Dernière MAJ il y a 5j</div></div>
-                <div style="color:#E4002B;font-size:.65rem;font-weight:800;font-family:sans-serif">1,850 DT</div>
-              </div>
-            </div>
+          <div class="sc-overlay">
+            <button class="sc-play-btn"><i class="ph-bold ph-play"></i> Tester en direct</button>
           </div>
-          <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid rgba(0,0,0,.08);display:flex;padding:6px 0">
-            <div style="flex:1;text-align:center;font-size:.5rem;color:#E4002B;font-family:sans-serif">🏠 Accueil</div>
-            <div style="flex:1;text-align:center;font-size:.5rem;color:#9595A8;font-family:sans-serif">👥 Clients</div>
-            <div style="flex:1;text-align:center;font-size:.5rem;color:#9595A8;font-family:sans-serif">📊 Rapports</div>
+          <div class="sc-badge"><i class="ph-bold ph-circle-wavy-check"></i> Demo live</div>
+        </div>
+        <div class="sc-info">
+          <div class="sc-app-icon" style="background:linear-gradient(135deg,#b07cff,#6c8fff)"><i class="ph-bold ph-money"></i></div>
+          <div>
+            <div class="sc-name">Debt Manager Pro</div>
+            <div class="sc-desc" data-k="sc3d">Suivi dettes, clients débiteurs, relances</div>
           </div>
         </div>
-        <div class="ac-info"><div class="ac-name">💰 Debt Manager</div><div class="ac-desc">Suivi dettes, clients débiteurs, relances</div></div>
-        <div class="ac-overlay"><div class="ac-play">▶</div><div style="color:#fff;font-size:.78rem;font-weight:600;text-align:center;margin-top:8px">Tester l'app</div></div>
-        <div class="ac-tag">Demo live</div>
       </div>
-
     </div>
+
+    <!-- SCROLL INDICATOR (mobile only) -->
+    <div class="scroll-hint">
+      <i class="ph-bold ph-arrow-right"></i>
+      <span>Faites glisser pour voir plus</span>
+    </div>
+
   </div>
 </section>
 
-<!-- APP MODAL -->
-<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+<!-- APP VIEWER MODAL -->
+<div id="appModal" class="modal-bg" onclick="if(event.target===this)closeAppModal()">
   <div class="modal-box">
     <div class="modal-header">
       <div class="modal-title">
-        <div class="modal-title-icon" id="mIcon">☕</div>
-        <span id="mTitle">App Café</span>
+        <div class="modal-title-icon"><i class="ph-bold ph-device-mobile" id="mIcon"></i></div>
+        <span id="mName">Application</span>
       </div>
       <div class="modal-actions">
-        <button class="m-demo-btn" onclick="goEstimateur()">🎯 Je veux cette app</button>
-        <button class="m-close" onclick="closeModal()">✕</button>
+        <button class="m-demo-btn" onclick="buyThisApp()">
+          <i class="ph-bold ph-shopping-cart"></i> Acheter cette app
+        </button>
+        <button class="m-close" onclick="closeAppModal()"><i class="ph-bold ph-x"></i></button>
       </div>
     </div>
     <div class="modal-frame-wrap">
-      <iframe id="modalFrame" src="" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+      <iframe id="mFrame" src="" sandbox="allow-scripts allow-forms allow-popups allow-same-origin" allow="fullscreen"></iframe>
     </div>
-    <div class="modal-hint">Appuyez sur Échap pour fermer · Cette app est un exemple interactif</div>
+    <div class="modal-hint">Appuyez sur <kbd>Échap</kbd> pour fermer · Cette app est un exemple interactif</div>
   </div>
 </div>
 
-<!-- MARKETPLACE PREVIEW -->
+<!-- MARKETPLACE APPS PREVIEW -->
 <section id="marketplace">
   <div class="cnt">
-    <div class="slbl r" style="justify-content:center">Applications partenaires</div>
-    <h2 class="stitle r2" style="text-align:center">Apps créées pour nos clients<br><span style="background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">disponibles à la vente</span></h2>
-    <p class="ssub r3" style="text-align:center;max-width:520px;margin:0 auto 40px">Ces applications ont été développées pour nos partenaires. Achetez-en une et nous l'adaptons à votre business en 48h.</p>
-    <div class="apps-grid" id="marketGrid" style="margin-bottom:32px">
-      <div class="app-card g r" onclick="openMarketApp(0)" style="aspect-ratio:unset;padding:20px">
-        <div class="ac-top"><div class="ac-icon">☕</div><div><div class="ac-name" style="color:var(--tx)">App Café & Restaurant</div><div class="ac-desc">Gestion commandes, caisse, employés</div></div></div>
-        <div class="ac-tags"><span class="ac-tag" style="position:static;background:rgba(108,143,255,.2);border-color:rgba(108,143,255,.4)">Stock</span><span class="ac-tag" style="position:static;background:rgba(108,143,255,.2);border-color:rgba(108,143,255,.4)">Caisse</span><span class="ac-tag" style="position:static;background:rgba(108,143,255,.2);border-color:rgba(108,143,255,.4)">Employés</span></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-          <div style="font-family:'Syne',sans-serif;font-weight:800;color:var(--ac);font-size:1.1rem">299 DT</div>
-          <button class="btn-try-market" onclick="event.stopPropagation();openMarketApp(0)">👁 Essayer</button>
+    <div class="mp-header">
+      <div>
+        <div class="slbl r" data-k="mpl">Applications partenaires</div>
+        <h2 class="stitle r2" data-k="mpt">Apps créées pour nos clients<br>disponibles à la vente</h2>
+        <p class="ssub r3" data-k="mps">Ces applications ont été développées pour nos partenaires. Achetez-en une et nous l'adaptons à votre business en 48h.</p>
+      </div>
+    </div>
+
+    <!-- CARDS (desktop: grid 3col, mobile: horizontal scroll) -->
+    <div class="mp-preview-track r4" id="mpPreviewTrack">
+      <!-- Chargées depuis Firestore via JS — fallback statique ci-dessous -->
+      <div class="mp-card g" data-app-idx="0">
+        <div class="mp-card-thumb" style="background:linear-gradient(135deg,#1A0B03,#E8A020)">
+          <i class="ph-bold ph-coffee"></i>
+        </div>
+        <div class="mp-card-body">
+          <div class="mp-card-tags">
+            <span class="mp-tag">Stock</span>
+            <span class="mp-tag">Caisse</span>
+            <span class="mp-tag">Employés</span>
+          </div>
+          <h4 class="mp-card-name">App Café &amp; Restaurant</h4>
+          <p class="mp-card-desc">Gestion commandes, caisse, employés</p>
+          <div class="mp-card-footer">
+            <div class="mp-card-price">299 DT</div>
+            <button class="btn-try-market" onclick="event.stopPropagation();openMarketApp(0)">
+              <i class="ph-bold ph-eye"></i> Essayer
+            </button>
+          </div>
         </div>
       </div>
-      <div class="app-card g r2" onclick="openMarketApp(1)" style="aspect-ratio:unset;padding:20px">
-        <div class="ac-top"><div class="ac-icon">🔄</div><div><div class="ac-name" style="color:var(--tx)">App Grossiste / Recharge</div><div class="ac-desc">Stock, commandes, crédits clients</div></div></div>
-        <div class="ac-tags"><span class="ac-tag" style="position:static;background:rgba(108,143,255,.2);border-color:rgba(108,143,255,.4)">Stock</span><span class="ac-tag" style="position:static;background:rgba(108,143,255,.2);border-color:rgba(108,143,255,.4)">Crédits</span><span class="ac-tag" style="position:static;background:rgba(108,143,255,.2);border-color:rgba(108,143,255,.4)">Clients</span></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-          <div style="font-family:'Syne',sans-serif;font-weight:800;color:var(--ac);font-size:1.1rem">349 DT</div>
-          <button class="btn-try-market" onclick="event.stopPropagation();openMarketApp(1)">👁 Essayer</button>
+      <div class="mp-card g" data-app-idx="1">
+        <div class="mp-card-thumb" style="background:linear-gradient(135deg,#061a06,#34d399)">
+          <i class="ph-bold ph-arrows-counter-clockwise"></i>
+        </div>
+        <div class="mp-card-body">
+          <div class="mp-card-tags">
+            <span class="mp-tag">Stock</span>
+            <span class="mp-tag">Crédits</span>
+            <span class="mp-tag">Clients</span>
+          </div>
+          <h4 class="mp-card-name">App Grossiste / Recharge</h4>
+          <p class="mp-card-desc">Stock, commandes, crédits clients</p>
+          <div class="mp-card-footer">
+            <div class="mp-card-price">349 DT</div>
+            <button class="btn-try-market" onclick="event.stopPropagation();openMarketApp(1)">
+              <i class="ph-bold ph-eye"></i> Essayer
+            </button>
+          </div>
         </div>
       </div>
-      <div class="app-card g r3" onclick="openMarketApp(2)" style="aspect-ratio:unset;padding:20px">
-        <div class="ac-top"><div class="ac-icon">💰</div><div><div class="ac-name" style="color:var(--tx)">App Suivi Dettes</div><div class="ac-desc">Clients, dettes, paiements, rapports</div></div></div>
-        <div class="ac-tags"><span class="ac-tag" style="position:static;background:rgba(108,143,255,.2);border-color:rgba(108,143,255,.4)">Dettes</span><span class="ac-tag" style="position:static;background:rgba(108,143,255,.2);border-color:rgba(108,143,255,.4)">Clients</span><span class="ac-tag" style="position:static;background:rgba(108,143,255,.2);border-color:rgba(108,143,255,.4)">Rapports</span></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-          <div style="font-family:'Syne',sans-serif;font-weight:800;color:var(--ac);font-size:1.1rem">249 DT</div>
-          <button class="btn-try-market" onclick="event.stopPropagation();openMarketApp(2)">👁 Essayer</button>
+      <div class="mp-card g" data-app-idx="2">
+        <div class="mp-card-thumb" style="background:linear-gradient(135deg,#0a0618,#b07cff)">
+          <i class="ph-bold ph-money"></i>
+        </div>
+        <div class="mp-card-body">
+          <div class="mp-card-tags">
+            <span class="mp-tag">Dettes</span>
+            <span class="mp-tag">Clients</span>
+            <span class="mp-tag">Rapports</span>
+          </div>
+          <h4 class="mp-card-name">App Suivi Dettes</h4>
+          <p class="mp-card-desc">Clients, dettes, paiements, rapports</p>
+          <div class="mp-card-footer">
+            <div class="mp-card-price">249 DT</div>
+            <button class="btn-try-market" onclick="event.stopPropagation();openMarketApp(2)">
+              <i class="ph-bold ph-eye"></i> Essayer
+            </button>
+          </div>
         </div>
       </div>
     </div>
-    <div style="text-align:center">
-      <a href="marketplace.html" class="est-btn r4">Voir toutes nos applications →</a>
+
+    <!-- SCROLL INDICATOR (mobile only) -->
+    <div class="scroll-hint">
+      <i class="ph-bold ph-arrow-right"></i>
+      <span>Faites glisser pour voir plus</span>
+    </div>
+
+    <div style="text-align:center;margin-top:44px">
+      <a href="marketplace.html" class="est-btn r5">
+        <i class="ph-bold ph-storefront"></i>
+        <span data-k="mpall">Voir toutes nos applications</span>
+        <i class="ph-bold ph-arrow-right"></i>
+      </a>
     </div>
   </div>
 </section>
@@ -420,12 +562,16 @@
 <div id="marketModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(3,3,13,.92);backdrop-filter:blur(16px);flex-direction:column">
   <div class="mkt-header">
     <div style="display:flex;align-items:center;gap:11px">
-      <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem" id="mktTitle">Application</span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem" id="mktTitle">Application</span>
       <span style="font-size:.7rem;background:rgba(92,142,255,.15);border:1px solid rgba(92,142,255,.25);color:var(--ac);padding:3px 9px;border-radius:10px;font-weight:700" id="mktPrice"></span>
     </div>
-    <div style="display:flex;gap:9px">
-      <button onclick="buyMarketApp()" style="padding:8px 18px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:.83rem;cursor:pointer;box-shadow:0 4px 14px rgba(92,142,255,.3)">💳 Acheter cette app</button>
-      <button onclick="closeMarketModal()" style="width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);cursor:pointer;color:rgba(255,255,255,.6);font-size:1rem">✕</button>
+    <div style="display:flex;gap:9px;align-items:center">
+      <button onclick="buyMarketApp()" style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.83rem;cursor:pointer">
+        <i class="ph-bold ph-shopping-cart"></i> Acheter cette app
+      </button>
+      <button onclick="closeMarketModal()" style="width:36px;height:36px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);cursor:pointer;color:rgba(255,255,255,.6);font-size:1rem;display:flex;align-items:center;justify-content:center">
+        <i class="ph-bold ph-x"></i>
+      </button>
     </div>
   </div>
   <iframe id="mktFrame" src="" style="flex:1;border:none;width:100%" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
@@ -442,7 +588,7 @@
     <div class="packs-grid">
       <!-- ESSENTIEL -->
       <div class="pack-card g r">
-        <span class="pack-icon">🟢</span>
+        <div class="pack-icon-wrap pack-icon-green"><i class="ph-bold ph-lightning"></i></div>
         <div class="pack-name">Essentiel</div>
         <div class="pack-for">Pour les petits business qui veulent s'organiser</div>
         <div class="pack-price">
@@ -450,21 +596,21 @@
           <div class="pack-price monthly">+ 20 DT / mois</div>
         </div>
         <ul class="pack-features">
-          <li>App simple et fonctionnelle</li>
-          <li>Fonctionnalités de base</li>
-          <li>Usage privé uniquement</li>
-          <li>Support par message</li>
-          <li>1 mise à jour / trimestre</li>
-          <li class="no">Monétisation</li>
-          <li class="no">Marketplace</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>App simple et fonctionnelle</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>Fonctionnalités de base</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>Usage privé uniquement</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>Support par message</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>1 mise à jour / trimestre</li>
+          <li class="no"><i class="ph-bold ph-x-circle feat-no"></i>Monétisation</li>
+          <li class="no"><i class="ph-bold ph-x-circle feat-no"></i>Marketplace</li>
         </ul>
-        <button class="pack-btn outline" onclick="choosePack('essentiel')">Choisir Essentiel →</button>
-        <p style="font-size:.72rem;color:var(--green);text-align:center;margin-top:10px;opacity:.85">💳 Paiement après validation de votre démo</p>
+        <button class="pack-btn outline" onclick="choosePack('essentiel')">Choisir Essentiel <i class="ph-bold ph-arrow-right"></i></button>
+        <p class="pack-pay-note"><i class="ph-bold ph-credit-card"></i> Paiement après validation de votre démo</p>
       </div>
       <!-- PRO -->
       <div class="pack-card g2 featured r2">
-        <div class="pack-badge">⭐ RECOMMANDÉ</div>
-        <span class="pack-icon">🔵</span>
+        <div class="pack-badge"><i class="ph-bold ph-star"></i> RECOMMANDÉ</div>
+        <div class="pack-icon-wrap pack-icon-blue"><i class="ph-bold ph-star-four"></i></div>
         <div class="pack-name">Pro</div>
         <div class="pack-for">Pour optimiser votre business avec toutes les fonctionnalités</div>
         <div class="pack-price">
@@ -473,20 +619,20 @@
           <div class="pack-price option-price">+ Option marketplace : 100 – 200 DT</div>
         </div>
         <ul class="pack-features">
-          <li>App 100% personnalisée</li>
-          <li>Toutes les fonctionnalités</li>
-          <li>Tableau de bord avancé</li>
-          <li>Support prioritaire</li>
-          <li>Mises à jour illimitées</li>
-          <li class="hot">Option : activer la monétisation</li>
-          <li class="hot">Accès plateforme Walaup</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>App 100% personnalisée</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>Toutes les fonctionnalités</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>Tableau de bord avancé</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>Support prioritaire</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>Mises à jour illimitées</li>
+          <li class="hot"><i class="ph-bold ph-fire feat-hot"></i>Option : activer la monétisation</li>
+          <li class="hot"><i class="ph-bold ph-fire feat-hot"></i>Accès plateforme Walaup</li>
         </ul>
-        <button class="pack-btn main" onclick="choosePack('pro')">Choisir Pro ⭐ →</button>
-        <p style="font-size:.72rem;color:var(--green);text-align:center;margin-top:10px;opacity:.85">💳 Paiement après validation de votre démo</p>
+        <button class="pack-btn main" onclick="choosePack('pro')">Choisir Pro <i class="ph-bold ph-star"></i></button>
+        <p class="pack-pay-note"><i class="ph-bold ph-credit-card"></i> Paiement après validation de votre démo</p>
       </div>
       <!-- PARTENAIRE -->
       <div class="pack-card g r3">
-        <span class="pack-icon">🔴</span>
+        <div class="pack-icon-wrap pack-icon-fire"><i class="ph-bold ph-rocket-launch"></i></div>
         <div class="pack-name">Partenaire</div>
         <div class="pack-for">Transformez votre app en source de revenus passifs</div>
         <div class="pack-price">
@@ -495,28 +641,43 @@
           <div class="pack-price option-price">Partage revenus : vous 60–70% / walaup 30–40%</div>
         </div>
         <ul class="pack-features">
-          <li>App sur mesure complète</li>
-          <li>Vous êtes propriétaire</li>
-          <li>Publication sur notre plateforme</li>
-          <li class="hot">Revente à d'autres entreprises</li>
-          <li class="hot">Revenus passifs mensuels</li>
-          <li class="hot">Walaup vend pour vous</li>
-          <li>Accompagnement business</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>App sur mesure complète</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>Vous êtes propriétaire</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>Publication sur notre plateforme</li>
+          <li class="hot"><i class="ph-bold ph-fire feat-hot"></i>Revente à d'autres entreprises</li>
+          <li class="hot"><i class="ph-bold ph-fire feat-hot"></i>Revenus passifs mensuels</li>
+          <li class="hot"><i class="ph-bold ph-fire feat-hot"></i>Walaup vend pour vous</li>
+          <li><i class="ph-bold ph-check-circle feat-yes"></i>Accompagnement business</li>
         </ul>
-        <button class="pack-btn fire" onclick="choosePack('partenaire')">🔥 Devenir Partenaire</button>
-        <p style="font-size:.72rem;color:var(--green);text-align:center;margin-top:10px;opacity:.85">💳 Paiement après validation de votre démo</p>
+        <button class="pack-btn fire" onclick="choosePack('partenaire')">
+          <i class="ph-bold ph-rocket-launch"></i> Devenir Partenaire
+        </button>
+        <p class="pack-pay-note"><i class="ph-bold ph-credit-card"></i> Paiement après validation de votre démo</p>
       </div>
     </div>
 
     <!-- MONETIZE TEASER -->
     <div class="mono-section r4">
-      <h3>💡 Votre app peut devenir un produit</h3>
+      <div class="mono-icon"><i class="ph-bold ph-lightbulb"></i></div>
+      <h3>Votre app peut devenir un produit</h3>
       <p>Si votre application peut être utile à d'autres entreprises, nous la proposons sur notre plateforme et partageons les revenus avec vous. Vous ne vendez plus — nous vendons pour vous.</p>
       <div class="revenue-example">
-        <div class="rev-card"><div class="rev-num">10</div><div class="rev-lbl">entreprises utilisent votre app</div></div>
-        <div class="rev-card"><div class="rev-num">300 DT</div><div class="rev-lbl">revenus / mois générés</div></div>
-        <div class="rev-card"><div class="rev-num rev-you">180 DT</div><div class="rev-lbl">votre part (60%)</div></div>
-        <div class="rev-card"><div class="rev-num">→ ∞</div><div class="rev-lbl">scalable sans effort</div></div>
+        <div class="rev-card">
+          <div class="rev-num">10</div>
+          <div class="rev-lbl">entreprises utilisent votre app</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-num">300 DT</div>
+          <div class="rev-lbl">revenus / mois générés</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-num rev-you">180 DT</div>
+          <div class="rev-lbl">votre part (60%)</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-num"><i class="ph-bold ph-infinity"></i></div>
+          <div class="rev-lbl">scalable sans effort</div>
+        </div>
       </div>
       <p style="font-size:.8rem;color:var(--mu)">Vous créez l'app une fois. Elle tourne, elle se vend, elle vous paie.</p>
     </div>
@@ -524,10 +685,10 @@
     <!-- ESTIMATEUR CTA -->
     <div class="est-banner r5">
       <div class="est-banner-left">
-        <h3>🧮 Estimez le prix de votre app en 2 minutes</h3>
+        <h3><i class="ph-bold ph-calculator" style="margin-right:8px;color:var(--ac)"></i>Estimez le prix de votre app en 2 minutes</h3>
         <p>Notre estimateur analyse vos besoins et vous donne une fourchette de prix précise + la formule recommandée. Gratuit, sans engagement.</p>
       </div>
-      <a href="estimateur.html" class="est-btn">Calculer le prix →</a>
+      <a href="estimateur.html" class="est-btn">Calculer le prix <i class="ph-bold ph-arrow-right"></i></a>
     </div>
   </div>
 </section>
@@ -543,21 +704,23 @@
       <div class="auth-inline r4" id="ctaAuthBox">
         <div class="auth-msg" id="ctaMsg"></div>
         <div class="auth-tabs">
-          <button class="auth-tab on" onclick="ctaTab('google',this)">🔵 Google</button>
-          <button class="auth-tab" onclick="ctaTab('phone',this)">📱 Téléphone</button>
-          <button class="auth-tab" onclick="ctaTab('email',this)">✉️ Email</button>
+          <button class="auth-tab on" onclick="ctaTab('google',this)">
+            <svg viewBox="0 0 24 24" width="14" height="14" style="margin-right:5px;vertical-align:middle"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Google
+          </button>
+          <button class="auth-tab" onclick="ctaTab('phone',this)">
+            <i class="ph-bold ph-device-mobile" style="margin-right:4px"></i><span data-k="gc2">Téléphone</span>
+          </button>
+          <button class="auth-tab" onclick="ctaTab('email',this)">
+            <i class="ph-bold ph-envelope" style="margin-right:4px"></i><span data-k="gc3">Email</span>
+          </button>
         </div>
 
         <!-- GOOGLE -->
         <div class="auth-panel on" id="ctaGoogle">
           <button class="btn-goog" id="ctaGBtn" onclick="ctaGoogle()" style="width:100%">
-            <svg viewBox="0 0 24 24" width="19" height="19">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Continuer avec Google
+            <svg viewBox="0 0 24 24" width="19" height="19"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            <span data-k="gc1">Continuer avec Google</span>
           </button>
           <p style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:10px">Connexion en 1 clic — recommandé</p>
         </div>
@@ -573,7 +736,7 @@
               </div>
             </div>
             <div id="rcap-cta"></div>
-            <button class="auth-btn" id="ctaSendBtn" onclick="ctaSendOTP()">Envoyer le code SMS →</button>
+            <button class="auth-btn" id="ctaSendBtn" onclick="ctaSendOTP()">Envoyer le code SMS <i class="ph-bold ph-paper-plane-right"></i></button>
           </div>
           <div id="ctaPh2" style="display:none">
             <p style="font-size:.76rem;color:var(--muted);text-align:center;margin-bottom:8px">Code envoyé au <strong id="ctaPhSent" style="color:var(--tx)"></strong></p>
@@ -585,9 +748,9 @@
               <input class="auth-ob" type="tel" maxlength="1" id="co5">
               <input class="auth-ob" type="tel" maxlength="1" id="co6">
             </div>
-            <button class="auth-btn" id="ctaVerBtn" onclick="ctaVerOTP()">Vérifier →</button>
+            <button class="auth-btn" id="ctaVerBtn" onclick="ctaVerOTP()">Vérifier <i class="ph-bold ph-check"></i></button>
             <p style="text-align:center;margin-top:8px;font-size:.73rem;color:var(--muted)">Pas reçu ? <button id="ctaRsBtn" onclick="ctaResetPh()" style="background:none;border:none;color:var(--ac);font-size:.73rem;cursor:pointer" disabled>Renvoyer</button></p>
-            <span style="display:block;text-align:center;font-size:.7rem;color:var(--muted);cursor:pointer;margin-top:7px" onclick="ctaResetPh()">← Changer de numéro</span>
+            <span style="display:block;text-align:center;font-size:.7rem;color:var(--muted);cursor:pointer;margin-top:7px" onclick="ctaResetPh()"><i class="ph-bold ph-arrow-left"></i> Changer de numéro</span>
           </div>
         </div>
 
@@ -609,14 +772,14 @@
             <label>Mot de passe</label>
             <input type="password" id="ctaEPass" placeholder="••••••••">
           </div>
-          <button class="auth-btn" id="ctaEBtn" onclick="ctaDoEmail()">Connexion →</button>
+          <button class="auth-btn" id="ctaEBtn" onclick="ctaDoEmail()">Connexion <i class="ph-bold ph-arrow-right"></i></button>
         </div>
       </div>
 
       <div class="trust-row r5" style="margin-top:18px">
-        <span data-k="tr1">Démo gratuite — 0 DT avant validation</span>
-        <span data-k="tr2">Réponse en 24 heures</span>
-        <span data-k="tr3">Sans engagement</span>
+        <span data-k="tr1"><i class="ph-bold ph-check" style="color:var(--ac);margin-right:4px"></i>Démo gratuite — 0 DT avant validation</span>
+        <span data-k="tr2"><i class="ph-bold ph-check" style="color:var(--ac);margin-right:4px"></i>Réponse en 24 heures</span>
+        <span data-k="tr3"><i class="ph-bold ph-check" style="color:var(--ac);margin-right:4px"></i>Sans engagement</span>
       </div>
     </div>
   </div>
@@ -628,7 +791,10 @@
     <div class="slbl r" style="justify-content:center" data-k="ctl">Prêt à changer ?</div>
     <h2 class="stitle r2" data-k="ctt">Votre business mérite<br>mieux qu'Excel et WhatsApp</h2>
     <p class="ssub r3" style="margin:0 auto 38px" data-k="cts">Rejoignez les entrepreneurs tunisiens qui ont automatisé.</p>
-    <button class="btn-p r4" onclick="goEstimateur()"><span data-k="ctb">Recevoir ma démo gratuite →</span></button>
+    <button class="btn-p r4" onclick="goEstimateur()">
+      <span data-k="ctb">Recevoir ma démo gratuite</span>
+      <i class="ph-bold ph-arrow-right arr"></i>
+    </button>
   </div>
 </section>
 
@@ -637,18 +803,13 @@
   <div class="fi">
     <div class="flogo"><span class="brand-wordmark brand-wordmark--sm">Walaup</span></div>
     <div class="flinks">
-      <a href="#solutions" data-k="ns">Solutions</a>
-      <a href="#how" data-k="nh">Comment ça marche</a>
-      <a href="client.html" data-k="fce">Mon espace client</a>
-      <a href="admin.html" style="color:var(--mu2);font-size:.73rem">Admin ↗</a>
+      <a href="#solutions" data-k="ns"><i class="ph-bold ph-squares-four"></i> Solutions</a>
+      <a href="#how" data-k="nh"><i class="ph-bold ph-steps"></i> Comment ça marche</a>
+      <a href="client.html" data-k="fce"><i class="ph-bold ph-user-circle"></i> Mon espace client</a>
     </div>
     <div style="margin-top:14px">
       <a href="marketplace.html" class="footer-mp-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffd600" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <path d="M16 10a4 4 0 01-8 0"/>
-        </svg>
+        <i class="ph-bold ph-storefront"></i>
         Explorer la Marketplace
       </a>
     </div>
@@ -663,10 +824,10 @@
     <div class="est-handle"></div>
     <div class="est-sheet-header">
       <div class="est-sheet-title">
-        <span>🧮</span>
+        <span><i class="ph-bold ph-calculator" style="color:#fff;font-size:.9rem"></i></span>
         Estimateur de prix · App sur mesure
       </div>
-      <button class="est-close" onclick="closeEst()">✕</button>
+      <button class="est-close" onclick="closeEst()"><i class="ph-bold ph-x"></i></button>
     </div>
     <iframe class="est-frame" id="estFrame" src="" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"></iframe>
   </div>
@@ -677,7 +838,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js"></script>
-<script src="js/effects.js"></script> 
+<script src="js/auth.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/effects.js"></script>
 <script src="js/index.js"></script>
 
 </body>
