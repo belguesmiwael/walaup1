@@ -372,16 +372,12 @@
     <!-- SCREENSHOTS TRACK (desktop: grid 3col, mobile: horizontal scroll) -->
     <div class="screenshots-track r2">
       <!-- Screenshot 1 -->
-      <div class="screenshot-card g" onclick="openApp(0)">
+      <div class="screenshot-card g">
         <div class="sc-img-wrap">
           <img src="images/screenshot-cafe.jpg" alt="App Café" class="sc-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="sc-fallback" style="display:none;background:linear-gradient(135deg,#1A0B03,#241205)">
             <i class="ph-bold ph-coffee" style="font-size:3rem;color:#C8860A;opacity:.6"></i>
           </div>
-          <div class="sc-overlay">
-            <button class="sc-play-btn"><i class="ph-bold ph-play"></i> Tester en direct</button>
-          </div>
-          <div class="sc-badge"><i class="ph-bold ph-circle-wavy-check"></i> Demo live</div>
         </div>
         <div class="sc-info">
           <div class="sc-app-icon" style="background:linear-gradient(135deg,#C8860A,#E8A020)"><i class="ph-bold ph-coffee"></i></div>
@@ -393,16 +389,12 @@
       </div>
 
       <!-- Screenshot 2 -->
-      <div class="screenshot-card g" onclick="openApp(1)">
+      <div class="screenshot-card g">
         <div class="sc-img-wrap">
           <img src="images/screenshot-grossiste.jpg" alt="App Grossiste" class="sc-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="sc-fallback" style="display:none;background:linear-gradient(135deg,#061a06,#0a2a0a)">
             <i class="ph-bold ph-arrows-counter-clockwise" style="font-size:3rem;color:#34d399;opacity:.6"></i>
           </div>
-          <div class="sc-overlay">
-            <button class="sc-play-btn"><i class="ph-bold ph-play"></i> Tester en direct</button>
-          </div>
-          <div class="sc-badge"><i class="ph-bold ph-circle-wavy-check"></i> Demo live</div>
         </div>
         <div class="sc-info">
           <div class="sc-app-icon" style="background:linear-gradient(135deg,#34d399,#059669)"><i class="ph-bold ph-arrows-counter-clockwise"></i></div>
@@ -414,16 +406,12 @@
       </div>
 
       <!-- Screenshot 3 -->
-      <div class="screenshot-card g" onclick="openApp(2)">
+      <div class="screenshot-card g">
         <div class="sc-img-wrap">
           <img src="images/screenshot-dettes.jpg" alt="App Dettes" class="sc-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="sc-fallback" style="display:none;background:linear-gradient(135deg,#0a0618,#160a2a)">
             <i class="ph-bold ph-money" style="font-size:3rem;color:#b07cff;opacity:.6"></i>
           </div>
-          <div class="sc-overlay">
-            <button class="sc-play-btn"><i class="ph-bold ph-play"></i> Tester en direct</button>
-          </div>
-          <div class="sc-badge"><i class="ph-bold ph-circle-wavy-check"></i> Demo live</div>
         </div>
         <div class="sc-info">
           <div class="sc-app-icon" style="background:linear-gradient(135deg,#b07cff,#6c8fff)"><i class="ph-bold ph-money"></i></div>
@@ -558,8 +546,8 @@
   </div>
 </section>
 
-<!-- MARKET APP MODAL -->
-<div id="marketModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(3,3,13,.92);backdrop-filter:blur(16px);flex-direction:column">
+<!-- MARKET APP MODAL — plein écran identique à marketplace.html -->
+<div id="marketModal" style="display:none;position:fixed;inset:0;z-index:2100;background:rgba(3,3,13,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);flex-direction:column">
   <div class="mkt-header">
     <div style="display:flex;align-items:center;gap:11px">
       <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem" id="mktTitle">Application</span>
@@ -574,7 +562,7 @@
       </button>
     </div>
   </div>
-  <iframe id="mktFrame" src="" style="flex:1;border:none;width:100%" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+  <iframe id="mktFrame" src="" style="flex:1;border:none;width:100%;display:block" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
 </div>
 
 <!-- PACKS -->
